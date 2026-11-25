@@ -42,6 +42,11 @@ export function createAppEventController({
   function wireEvents() {
     document.addEventListener("click", (event) => {
       showButtonClickFeedback(event.target);
+      const trigger = event.target.closest("[data-menu]");
+      const menu = trigger?.parentElement;
+      const wasOpen = menu?.classList.contains("open");
+      for (const open of document.querySelectorAll(".menu.open")) open.classList.remove("open");
+      if (menu && !wasOpen) menu.classList.add("open");
       const command = event.target.closest("[data-command]")?.dataset.command;
       if (command) Promise.resolve(commands[command]?.()).catch(showError);
       const bottomTab = event.target.closest("[data-bottom-tab]")?.dataset.bottomTab;
