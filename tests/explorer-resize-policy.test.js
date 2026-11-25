@@ -16,4 +16,7 @@ test("narrow windows auto-close the Explorer and only re-open what auto-close hi
   assert.equal(explorerAutoVisibility({ windowWidth: 800, visible: false, autoCollapsed: true }), "show");
   assert.equal(explorerAutoVisibility({ windowWidth: 800, visible: false, autoCollapsed: false }), null);
   assert.equal(explorerAutoVisibility({ windowWidth: 600, visible: false, autoCollapsed: false }), null);
+  // user re-opened it while already narrow: a further resize must not hide it again
+  assert.equal(explorerAutoVisibility({ windowWidth: 600, visible: true, autoCollapsed: false, previousWidth: 640 }), null);
+  assert.equal(explorerAutoVisibility({ windowWidth: 700, visible: true, autoCollapsed: false, previousWidth: 800 }), "hide");
 });

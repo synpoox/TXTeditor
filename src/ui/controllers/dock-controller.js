@@ -155,6 +155,7 @@ export function createDockController({
       const edge = dockForPanel(panel);
       panelEl.classList.toggle("hidden", !isPanelVisible(panel));
       panelEl.dataset.dockEdge = edge;
+      if (panel === "explorer" && els.explorerReveal) els.explorerReveal.dataset.edge = edge;
       panelEl.dataset.dockPanel = panel;
       const resizer = panelResizer(panel);
       if (resizer) resizer.dataset.dockEdge = edge;
@@ -311,8 +312,13 @@ export function createDockController({
   }
 
   // Narrow window: hide the Explorer without persisting; widening restores only what this hid.
+  let lastWindowWidth;
   function autoCollapseExplorer() {
-    const next = explorerAutoVisibility({ windowWidth: window.innerWidth, visible: state.sidebarVisible, autoCollapsed: state.explorerAutoCollapsed });
+    const previousWidth = lastWindowWidth;
+    lastWindowWidth = window.innerWidth;
+    // Only a left/right-docked Explorer is width-driven; top/bottom docks keep their own size.
+    if (dockForPanel("explorer") !== "left" && dockForPanel("explorer") !== "right") return;
+    const next = explorerAutoVisibility({ windowWidth: window.innerWidth, visible: state.sidebarVisible, autoCollapsed: state.explorerAutoCollapsed, previousWidth });
     if (!next) return;
     state.sidebarVisible = next === "show";
     state.explorerAutoCollapsed = next === "hide";

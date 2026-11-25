@@ -2600,10 +2600,10 @@ details:not([open]) .problem-file-header::before {
   left: 0;
   top: 31px;
   bottom: 0;
-  width: 6px;
+  width: 4px;
   z-index: 40;
   cursor: e-resize;
 }
 
-.shell.sidebar-hidden .explorer-reveal:hover { background: var(--accent); opacity: .5; }
-.shell.sidebar-hidden .explorer-reveal { display: block; }
+.shell.sidebar-hidden .explorer-reveal[data-edge="left"]:hover { background: var(--accent); opacity: .5; }
+.shell.sidebar-hidden .explorer-reveal[data-edge="left"] { display: block; }

@@ -11,8 +11,10 @@ export function explorerDragResult(rawWidth) {
 }
 
 // Returns "hide", "show" or null. Only re-opens a panel the auto-close hid, never one the user closed.
-export function explorerAutoVisibility({ windowWidth, visible, autoCollapsed }) {
-  if (visible && !autoCollapsed && windowWidth < EXPLORER_AUTO_CLOSE_BELOW) return "hide";
+// previousWidth makes hiding edge-triggered: a user who re-opens it in a narrow window is not undone by the next resize event.
+export function explorerAutoVisibility({ windowWidth, visible, autoCollapsed, previousWidth }) {
+  const crossedDown = previousWidth === undefined || previousWidth >= EXPLORER_AUTO_CLOSE_BELOW;
+  if (visible && !autoCollapsed && crossedDown && windowWidth < EXPLORER_AUTO_CLOSE_BELOW) return "hide";
   if (!visible && autoCollapsed && windowWidth >= EXPLORER_AUTO_OPEN_AT) return "show";
   return null;
 }

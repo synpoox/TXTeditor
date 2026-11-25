@@ -171,12 +171,13 @@ export function createShellController({
     for (const button of documentRef.querySelectorAll("[data-workspace-menu]")) {
       button.onclick = (event) => {
         event.stopPropagation();
+        // Measure before closing: a closed menu panel is display:none and reports a zero rect.
+        const rect = button.getBoundingClientRect();
         documentRef.querySelectorAll?.(".menu.open").forEach(menu => { menu.classList.remove("open"); menu.querySelector("[data-menu]")?.setAttribute("aria-expanded", "false"); });
         if (state.contextMenuOpen) {
           hideContextMenu();
           return;
         }
-        const rect = button.getBoundingClientRect();
         showActionContextMenu({ x: rect.right, y: rect.top, entries: workspaceMenuEntries(rect.right, rect.top) });
       };
     }

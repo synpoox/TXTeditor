@@ -58,7 +58,12 @@ export function createAppEventController({
     const open = document.querySelector?.(".menu.open");
     const menu = event.target.closest?.(".menu");
     if (event.key === "Escape") {
-      if (open) { closeMenus(); (menu?.querySelector("[data-menu]") ?? els.host).focus(); }
+      if (open) {
+        closeMenus();
+        (menu?.querySelector("[data-menu]") ?? els.host).focus();
+        event.preventDefault();
+        event.stopPropagation(); // this Escape only closes the menu
+      }
       return;
     }
     if (!menu) {
@@ -74,7 +79,8 @@ export function createAppEventController({
     } else if (delta) {
       event.preventDefault();
       if (!menu.classList.contains("open")) return openMenu(menu, true);
-      items[(items.indexOf(event.target) + delta + items.length) % items.length]?.focus();
+      const at = items.indexOf(event.target);
+      items[at < 0 ? (delta > 0 ? 0 : items.length - 1) : (at + delta + items.length) % items.length]?.focus();
     }
   }
 
