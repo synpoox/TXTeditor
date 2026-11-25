@@ -44,3 +44,18 @@ test("selection with many scattered ranges answers contains/hasFullRow like a pl
   assert.equal(sel.hasFullRow(33, 3), true);
   assert.equal(sel.hasFullRow(34, 3), false);
 });
+
+test("paste, copy and increment fill follow the displayed order", async () => {
+  const { pasteTextCommand, copyRanges, incrementFillSelectedCellsCommand } = await import("../src/core/operations.js");
+  const d = new TableDocument("t.txt", [["h", "n"], ["a", "10"], ["b", "2"], ["c", "7"], ["d", "1"]]);
+  setGridSort(d, { column: 1, dir: "asc" });
+  const sorted = cachedRowOrder(d); // display: d(1), b(2), c(7), a(10)
+  assert.deepEqual(sorted.order, [0, 4, 2, 3, 1]);
+  const paste = pasteTextCommand(d, { row: 4, column: 0 }, "x\ny", sorted);
+  paste.redo(d);
+  assert.deepEqual(d.rows.map((r) => r[0]), ["h", "a", "y", "c", "x"]);
+  assert.equal(copyRanges(d, [{ top: 1, bottom: 4, left: 0, right: 0 }], sorted.position), "x\ny\nc\na");
+  const fill = incrementFillSelectedCellsCommand(d, [{ top: 1, bottom: 4, left: 1, right: 1 }], { row: 4, column: 1 }, sorted.position);
+  fill.redo(d);
+  assert.deepEqual(sorted.order.slice(1).map((row) => d.rows[row][1]), ["1", "2", "3", "4"]);
+});

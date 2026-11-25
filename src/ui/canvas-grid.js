@@ -393,7 +393,8 @@ export class CanvasGrid {
     const left = fullRows ? 0 : Math.min(sel.anchor.column, column);
     const right = fullRows ? this.doc.columnCount - 1 : Math.max(sel.anchor.column, column);
     sel.focus = { row, column: fullRows ? right : column };
-    sel.ranges = rowRuns(sorted.order, a, b).map(([top, bottom]) => ({ top, bottom, left, right }));
+    const runs = rowRuns(sorted.order, a, b, (r) => this.doc.hiddenRows.has(r));
+    sel.ranges = (runs.length ? runs : [[row, row]]).map(([top, bottom]) => ({ top, bottom, left, right }));
   }
 
   setSort(column, dir) {

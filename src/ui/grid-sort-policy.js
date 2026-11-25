@@ -51,8 +51,8 @@ export function cachedRowOrder(doc) {
 }
 
 // Source-row runs [top, bottom] covered by display positions a..b, so a selection can span a scattered set of rows.
-export function rowRuns(order, a, b) {
-  const rows = order.slice(a, b + 1).sort((x, y) => x - y);
+export function rowRuns(order, a, b, isHidden = () => false) {
+  const rows = order.slice(a, b + 1).filter((row) => !isHidden(row)).sort((x, y) => x - y);
   const runs = [];
   for (const row of rows) {
     const last = runs[runs.length - 1];

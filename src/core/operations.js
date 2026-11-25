@@ -24,8 +24,10 @@ export function rangeCells(ranges) {
   return cells;
 }
 
-export function selectedCellsInGridOrder(ranges) {
-  return rangeCells(ranges).sort((a, b) => a.row - b.row || a.column - b.column);
+// position (optional): source row -> display position, so a sorted view fills and copies in the order shown.
+export function selectedCellsInGridOrder(ranges, position = null) {
+  const at = (row) => position?.[row] ?? row;
+  return rangeCells(ranges).sort((a, b) => at(a.row) - at(b.row) || a.column - b.column);
 }
 
 export function copyRange(doc, rect) {
@@ -38,24 +40,31 @@ export function copyRange(doc, rect) {
   return lines.join("\n");
 }
 
-export function copyRanges(doc, ranges) {
+export function copyRanges(doc, ranges, position = null) {
   if (!ranges.length) return "";
+  if (position) {
+    ranges = ranges.flatMap((range) => Array.from({ length: range.bottom - range.top + 1 }, (_, i) => ({ ...range, top: range.top + i, bottom: range.top + i })))
+      .sort((a, b) => (position[a.top] ?? a.top) - (position[b.top] ?? b.top));
+  }
   if (ranges.length === 1) return copyRange(doc, ranges[0]);
   return ranges.map((range) => copyRange(doc, range)).join("\n");
 }
 
-export function pasteTextCommand(doc, start, text) {
+// sorted (optional {order, position}): paste down the rows as displayed instead of by source index.
+export function pasteTextCommand(doc, start, text, sorted = null) {
   const rows = clipboardRows(text);
   const edits = [];
+  const startPosition = sorted?.position[start.row] ?? start.row;
   for (let row = 0; row < rows.length; row++) {
+    const target = sorted ? sorted.order[startPosition + row] ?? startPosition + row : start.row + row;
     for (let column = 0; column < rows[row].length; column++) {
-      edits.push({ row: start.row + row, column: start.column + column, value: rows[row][column] });
+      edits.push({ row: target, column: start.column + column, value: rows[row][column] });
     }
   }
   return makeCellCommand("Paste Range", doc, edits);
 }
 
-export function pasteTextToRangesCommand(doc, ranges, focus, text) {
+export function pasteTextToRangesCommand(doc, ranges, focus, text, sorted = null) {
   const rows = clipboardRows(text);
   if (rows.length === 1 && rows[0].length === 1) {
     const cells = rangeCells(ranges);
@@ -66,6 +75,15 @@ export function pasteTextToRangesCommand(doc, ranges, focus, text) {
   }
 
   const matrixWidth = rows.reduce((width, row) => Math.max(width, row.length), 0);
+  if (sorted && rows.length > 1) {
+    const selectedRows = [...new Set(ranges.flatMap((r) => Array.from({ length: r.bottom - r.top + 1 }, (_, i) => r.top + i)))]
+      .sort((a, b) => sorted.position[a] - sorted.position[b]);
+    const left = Math.min(...ranges.map((r) => r.left));
+    const width = Math.max(...ranges.map((r) => r.right)) - left + 1;
+    if (selectedRows.length === 1) return pasteTextCommand(doc, focus, text, sorted);
+    if (rows.length > selectedRows.length || matrixWidth > width) return makeCellCommand("Paste Range", doc, []);
+    return pasteTextCommand(doc, { row: selectedRows[0], column: left }, text, sorted);
+  }
   if (rows.length > 1 || matrixWidth > 1) {
     const [range] = ranges;
     const isSingleVerticalRange = ranges.length === 1
@@ -119,10 +137,10 @@ export function fillSelectionCommand(doc, rect) {
   return fillRangeCommand(doc, rect, doc.getCell(rect.top, rect.left));
 }
 
-export function fillSelectedCellsCommand(doc, ranges, sourceCell) {
+export function fillSelectedCellsCommand(doc, ranges, sourceCell, position = null) {
   const source = sourceCellOrFirstRangeCell(ranges, sourceCell);
   const value = doc.getCell(source.row, source.column);
-  return makeCellCommand("Fill Selected Cells", doc, selectedCellsInGridOrder(ranges).map(({ row, column }) => ({ row, column, value })));
+  return makeCellCommand("Fill Selected Cells", doc, selectedCellsInGridOrder(ranges, position).map(({ row, column }) => ({ row, column, value })));
 }
 
 export function incrementFillCommand(doc, rect) {
@@ -140,12 +158,12 @@ export function incrementFillCommand(doc, rect) {
   return makeCellCommand("Increment Fill", doc, edits);
 }
 
-export function incrementFillSelectedCellsCommand(doc, ranges, sourceCell) {
+export function incrementFillSelectedCellsCommand(doc, ranges, sourceCell, position = null) {
   const source = sourceCellOrFirstRangeCell(ranges, sourceCell);
   const seed = String(doc.getCell(source.row, source.column)).trim();
   if (seed === "") return makeCellCommand("Increment Fill", doc, []);
   const nextValue = incrementValueFactory(seed);
-  const edits = selectedCellsInGridOrder(ranges).map(({ row, column }, index) => ({ row, column, value: nextValue(index) }));
+  const edits = selectedCellsInGridOrder(ranges, position).map(({ row, column }, index) => ({ row, column, value: nextValue(index) }));
   return makeCellCommand("Increment Fill", doc, edits);
 }
 
