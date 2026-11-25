@@ -39,6 +39,11 @@ export function createGridCommandController({
     renderChrome();
   }
 
+  function sortColumn(dir) {
+    if (!hasOpenDocument()) return;
+    grid.setSort(state.contextHit?.column ?? state.selection.focus.column, dir);
+  }
+
   function unhideAll() {
     const doc = activeDoc();
     const rows = doc.hiddenRows;
@@ -149,6 +154,9 @@ export function createGridCommandController({
   }
 
   return {
+    sortAscending: () => sortColumn("asc"),
+    sortDescending: () => sortColumn("desc"),
+    clearSort: () => sortColumn(null),
     toggleFreeze,
     unhideAll,
     zoomBy,

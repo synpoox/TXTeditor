@@ -2,6 +2,7 @@ import { clamp } from "../core/table-model.js";
 import { editorBoxStyle, editorCellState, editorKeyAction, keyboardEditStartAction } from "./edit-policy.js";
 import { boundedTableExtent, classifyGridHit, classifyPanePoint, classifyResizeHandle } from "./grid-geometry.js";
 import { GridMetrics } from "./grid-metrics.js";
+import { cachedRowOrder, gridSort, setGridSort } from "./grid-sort-policy.js";
 import { cellBackground, cellTextColor, createGridRenderStats, initialColumnFitWidth, syncGridThemeFromStyle } from "./grid-render-policy.js";
 import { MANUAL_HIGHLIGHT_IDS } from "./manual-highlight.js";
 import { applyColumnSelection, applyRowSelection, applySelectionForHit, hasFullColumnRange, hasFullRowRange, keyboardSelectionTarget } from "./grid-selection-policy.js";
@@ -359,8 +360,10 @@ export class CanvasGrid {
     return CanvasGrid.prototype.gridMetrics.call(this).columnContentLeft(column);
   }
 
+  // Sorting is display-only: metrics work in display positions, everything else in source rows.
   rowContentTop(row) {
-    return CanvasGrid.prototype.gridMetrics.call(this).rowContentTop(row);
+    const sorted = cachedRowOrder(this.doc);
+    return CanvasGrid.prototype.gridMetrics.call(this).rowContentTop(sorted ? sorted.position[row] ?? row : row);
   }
 
   columnAtContent(x) {
@@ -368,7 +371,18 @@ export class CanvasGrid {
   }
 
   rowAtContent(y) {
-    return CanvasGrid.prototype.gridMetrics.call(this).rowAtContent(y);
+    const pos = CanvasGrid.prototype.gridMetrics.call(this).rowAtContent(y);
+    const sorted = cachedRowOrder(this.doc);
+    return sorted ? sorted.order[pos] ?? pos : pos;
+  }
+
+  setSort(column, dir) {
+    setGridSort(this.doc, dir ? { column, dir } : null);
+    this.draw();
+  }
+
+  sortState() {
+    return gridSort(this.doc);
   }
 
   visibleColumns() {
@@ -381,12 +395,14 @@ export class CanvasGrid {
   }
 
   visibleRows() {
-    return CanvasGrid.prototype.gridMetrics.call(this).visibleRows({
+    const rows = CanvasGrid.prototype.gridMetrics.call(this).visibleRows({
       scrollTop: this.scrollTop,
       viewportHeight: this.host.clientHeight,
       fixedTop: this.headerHeight + this.frozenRowHeight(),
       overscanPx: this.rowHeight * OVERSCAN_ROWS
     });
+    const sorted = cachedRowOrder(this.doc);
+    return sorted ? rows.map((item) => ({ ...item, row: sorted.order[item.row] ?? item.row })) : rows;
   }
 
   visibleRowIndexes() {

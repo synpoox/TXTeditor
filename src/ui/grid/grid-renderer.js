@@ -16,6 +16,7 @@ import {
   rowHeaderRenderState,
   updateGridRenderStats
 } from "../grid-render-policy.js";
+import { gridSort } from "../grid-sort-policy.js";
 
 export function drawGrid(grid, reason = "direct") {
   const started = performance.now();
@@ -140,7 +141,8 @@ function drawColumnHeader(grid, column, x, width, options = {}) {
   grid.ctx.fillStyle = GRID_COLORS[state.text];
   grid.ctx.font = grid.font(400);
   grid.ctx.textBaseline = "middle";
-  const label = columnIndexLabel(column);
+  const sort = gridSort(grid.doc);
+  const label = columnIndexLabel(column) + (sort?.column === column ? (sort.dir === "desc" ? " ▼" : " ▲") : "");
   const labelWidth = grid.ctx.measureText(label).width;
   grid.ctx.fillText(label, Math.max(x + 4, x + (width - labelWidth) / 2), centeredTextY(0, height));
 }

@@ -268,6 +268,13 @@ function uiCommandLabel(locale, english) {
   return UI_COMMAND_TRANSLATIONS[locale]?.[english] ?? english;
 }
 
+// Order follows SUPPORTED_LOCALES.
+const SORT_COMMAND_ROWS = {
+  "command.sort-ascending": ["Sort Column Ascending", "欄位遞增排序", "Spalte aufsteigend sortieren", "Ordenar columna ascendente", "Trier la colonne par ordre croissant", "Ordina colonna crescente", "열 오름차순 정렬", "Sortuj kolumnę rosnąco", "Ordenar columna ascendente", "列を昇順で並べ替え", "Classificar coluna em ordem crescente", "Сортировать столбец по возрастанию", "列升序排序"],
+  "command.sort-descending": ["Sort Column Descending", "欄位遞減排序", "Spalte absteigend sortieren", "Ordenar columna descendente", "Trier la colonne par ordre décroissant", "Ordina colonna decrescente", "열 내림차순 정렬", "Sortuj kolumnę malejąco", "Ordenar columna descendente", "列を降順で並べ替え", "Classificar coluna em ordem decrescente", "Сортировать столбец по убыванию", "列降序排序"],
+  "command.clear-sort": ["Clear Sort", "清除排序", "Sortierung aufheben", "Quitar ordenación", "Effacer le tri", "Rimuovi ordinamento", "정렬 해제", "Wyczyść sortowanie", "Quitar ordenación", "並べ替えを解除", "Limpar classificação", "Сбросить сортировку", "清除排序"]
+};
+Object.assign(CATALOG_ROWS, SORT_COMMAND_ROWS);
 Object.assign(CATALOG_ROWS, Object.fromEntries(Object.entries(UI_COMMAND_LABELS).map(([key, english]) => [
   key, SUPPORTED_LOCALES.map((locale) => uiCommandLabel(locale, english))
 ])));
