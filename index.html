@@ -23,10 +23,6 @@
               <span data-i18n="app.title">TXTeditor</span>
               <button class="workspace-menu-trigger" data-workspace-menu aria-label="Workspace" data-i18n-aria-label="workspace.section" aria-haspopup="menu">⋯</button>
             </header>
-            <div class="sidebar-actions">
-              <button data-command="open-file" data-i18n="toolbar.openFile">Open File</button>
-              <button data-command="open-folder" data-i18n="toolbar.openFolder">Open Folder</button>
-            </div>
             <div class="sidebar-search">
               <span class="sidebar-search-icon" aria-hidden="true"></span>
               <input id="explorerFilter" class="sidebar-filter" type="search" data-i18n-placeholder="explorer.search" data-i18n-aria-label="explorer.search" placeholder="Search file" aria-label="Search file" autocomplete="off" spellcheck="false" />
@@ -39,7 +35,8 @@
         <main class="main">
           <div id="tabs" class="tabs"></div>
           <section class="toolbar">
-            <button data-command="open-file" data-i18n="toolbar.open">Open</button>
+            <button data-command="open-file" data-i18n="toolbar.openFile">Open File</button>
+            <button data-command="open-folder" data-i18n="toolbar.openFolder">Open Folder</button>
             <button data-command="save-file" data-i18n="toolbar.save">Save</button>
             <button data-command="save-as" data-i18n="toolbar.saveAs">Save As</button>
             <button data-command="close-all" data-i18n="toolbar.closeAll" disabled>Close All</button>

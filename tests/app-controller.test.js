@@ -962,8 +962,8 @@ test("#84 manual folder selection persists its path while unavailable restore re
     assert.equal(state.workspace.path, "E:\\PickedWorkspace");
     assert.equal(values.get(WORKSPACE_PATH_STORAGE_KEY), "E:\\PickedWorkspace");
 
-    assert.equal(await controller.closeAll(), true);
-    assert.equal(values.has(WORKSPACE_PATH_STORAGE_KEY), false);
+    assert.equal(await controller.closeAll(), false);
+    assert.equal(values.get(WORKSPACE_PATH_STORAGE_KEY), "E:\\PickedWorkspace");
   } finally {
     if (originalWindow === undefined) delete globalThis.window;
     else globalThis.window = originalWindow;
@@ -1187,7 +1187,7 @@ test("closing the active tab commits editor changes before checking dirty state"
   assert.equal(state.docs.length, 1);
 });
 
-test("Close All removes workspace and standalone tabs after stopping Vector-LSP", async () => {
+test("Close All removes workspace and standalone tabs but keeps the workspace folder open", async () => {
   const workspaceDoc = TableDocument.fromText("skills.txt", "skill\nworkspace", {
     path: "E:\\Mods\\Example\\TXT\\skills.txt"
   });
@@ -1201,6 +1201,7 @@ test("Close All removes workspace and standalone tabs after stopping Vector-LSP"
     isVectorLintEngine: () => true,
     isLegacyLintEngine: () => false,
     lspOpenDoc: async () => {},
+    lspCloseDoc: async (doc) => events.push(["close", doc.name]),
     lspStopSession: async (reason) => events.push(["stop", reason]),
     resetWorkspaceView: () => events.push(["reset-view"])
   });
@@ -1211,14 +1212,19 @@ test("Close All removes workspace and standalone tabs after stopping Vector-LSP"
   state.lint.diagnostics = [{ id: "workspace-diagnostic" }];
 
   assert.equal(await controller.closeAll(), true);
-  assert.equal(state.workspace, null);
+  assert.equal(state.workspace.path, "E:\\Mods\\Example\\TXT");
   assert.deepEqual(state.docs, []);
   assert.equal(state.active, -1);
-  assert.deepEqual(state.lint.diagnostics, []);
-  assert.deepEqual(events, [
-    ["stop", "all-documents-closed"],
-    ["reset-view"]
-  ]);
+  assert.deepEqual(events, [["close", "skills.txt"], ["close", "notes.txt"]]);
+});
+
+test("Close Folder closes documents and the workspace", async () => {
+  const doc = TableDocument.fromText("skills.txt", "skill\nx", { path: "E:/Mods/Example/TXT/skills.txt" });
+  const { controller, state } = testDocumentController([], {}, { workspace: { path: "E:/Mods/Example/TXT", files: [] } });
+  await controller.addDocument(doc);
+  assert.equal(await controller.closeFolder(), true);
+  assert.equal(state.workspace, null);
+  assert.deepEqual(state.docs, []);
 });
 
 test("cancelling Close All preserves the workspace and documents without stopping LSP", async () => {
@@ -1278,7 +1284,7 @@ test("Close All applies discard and save choices before removing every tab", asy
   assert.deepEqual(writes, ["id\nsave"]);
   assert.deepEqual(state.docs, []);
   assert.equal(state.active, -1);
-  assert.equal(state.workspace, null);
+  assert.equal(state.workspace.path, "E:\\Mods\\Example\\TXT");
 });
 
 test("closing another tab commits the active editor before switching documents", async () => {
@@ -2272,7 +2278,7 @@ test("workspace profile restoration excludes concurrent close-all until restorat
     assert.equal(await opening, true);
     assert.deepEqual(state.docs.map(doc => doc.name), ["skills.txt"]);
     assert.equal(await controller.closeAll(), true);
-    assert.equal(state.workspace, null);
+    assert.equal(state.workspace.path, "E:/Mod");
     assert.equal(state.docs.length, 0);
     assert.deepEqual(errors, []);
   } finally { starting.resolve(); globalThis.window = previousWindow; }

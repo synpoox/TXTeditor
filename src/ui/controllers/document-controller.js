@@ -553,12 +553,23 @@ export function createDocumentController({
       return false;
     }
     switchingWorkspace = true;
+    try { return await closeAllNow({ keepWorkspace: true }); }
+    finally { switchingWorkspace = false; }
+  }
+
+  async function closeFolder() {
+    if (!state.workspace) return false;
+    if (switchingWorkspace) {
+      showToast(tText("workspace.switchBusy"));
+      return false;
+    }
+    switchingWorkspace = true;
     try { return await closeAllNow(); }
     finally { switchingWorkspace = false; }
   }
 
-  async function closeAllNow() {
-    if (!state.workspace?.path && !state.docs.length) return false;
+  async function closeAllNow({ keepWorkspace = false } = {}) {
+    if (keepWorkspace ? !state.docs.length : !state.workspace?.path && !state.docs.length) return false;
 
     if (state.docs.length) {
       commitActiveEditor();
@@ -583,23 +594,33 @@ export function createDocumentController({
     }
 
     cancelLegacyLintJobs({ clearDiagnostics: false });
-    resetLegacyWorkspaceIndex();
 
     let stopPromise;
-    try {
-      stopPromise = Promise.resolve(lspStopSession("all-documents-closed"));
-    } catch (error) {
-      stopPromise = Promise.reject(error);
+    if (keepWorkspace) {
+      // The workspace LSP session stays alive; only release the documents.
+      stopPromise = isVectorLintEngine()
+        ? Promise.all(state.docs.map((doc) => Promise.resolve(lspCloseDoc(doc)).catch((error) => reportLspCloseFailure(doc, error, "close-all"))))
+        : Promise.resolve();
+    } else {
+      resetLegacyWorkspaceIndex();
+      try {
+        stopPromise = Promise.resolve(lspStopSession("all-documents-closed"));
+      } catch (error) {
+        stopPromise = Promise.reject(error);
+      }
     }
 
-    setLintDiagnostics([]);
+    // Vector-LSP keeps workspace diagnostics; closeDoc removes each closed file's entries.
+    if (!keepWorkspace || !isVectorLintEngine()) setLintDiagnostics([]);
     state.lint.status = "";
-    state.workspace = null;
-    state.workspaceHiddenFiles = [];
-    state.workspaceProfilePath = "";
-    state.showHiddenWorkspaceFiles = false;
-    writeWorkspacePath("");
-    resetWorkspaceView();
+    if (!keepWorkspace) {
+      state.workspace = null;
+      state.workspaceHiddenFiles = [];
+      state.workspaceProfilePath = "";
+      state.showHiddenWorkspaceFiles = false;
+      writeWorkspacePath("");
+      resetWorkspaceView();
+    }
     for (const doc of state.docs) {
       if (isTableDocument(doc)) onTableDocumentClosed(doc);
     }
@@ -983,6 +1004,7 @@ export function createDocumentController({
     addDocument,
     askCloseChoice,
     closeAll,
+    closeFolder,
     closeTab,
     handleCloseDialogClick,
     handleExternalChangeDialogClick,
