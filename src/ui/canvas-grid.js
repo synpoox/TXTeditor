@@ -957,7 +957,9 @@ export class CanvasGrid {
 
   statusText() {
     const r = this.selection.rect;
-    return `${this.doc.name} | ${this.doc.rowCount.toLocaleString()} rows x ${this.doc.columnCount.toLocaleString()} columns | R${this.selection.focus.row + 1}:C${this.selection.focus.column + 1} | Selection ${r.bottom - r.top + 1}x${r.right - r.left + 1} | ${this.doc.dirty ? "Modified" : "Saved"} | ${this.doc.encoding} | ${Math.round(this.doc.zoom * 100)}%`;
+    const rows = this.selection.ranges.reduce((n, x) => n + x.bottom - x.top + 1, 0);
+    const height = gridSort(this.doc) && this.selection.ranges.length > 1 ? rows : r.bottom - r.top + 1;
+    return `${this.doc.name} | ${this.doc.rowCount.toLocaleString()} rows x ${this.doc.columnCount.toLocaleString()} columns | R${this.selection.focus.row + 1}:C${this.selection.focus.column + 1} | Selection ${height}x${r.right - r.left + 1} | ${this.doc.dirty ? "Modified" : "Saved"} | ${this.doc.encoding} | ${Math.round(this.doc.zoom * 100)}%`;
   }
 }
 

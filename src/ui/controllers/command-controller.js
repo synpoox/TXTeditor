@@ -31,7 +31,8 @@ function deleteRowRunsCommand(doc, runs) {
       for (let i = commands.length - 1; i >= 0; i--) commands[i].undo(target);
     },
     contentChanged: true,
-    lspChange: { kind: "full" }
+    lspChange: { kind: "full" },
+    highlightChanges: commands.map((item) => item.lspChange)
   });
 }
 

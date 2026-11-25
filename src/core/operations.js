@@ -84,8 +84,15 @@ export function pasteTextToRangesCommand(doc, ranges, focus, text, sorted = null
     const left = Math.min(...ranges.map((r) => r.left));
     const width = Math.max(...ranges.map((r) => r.right)) - left + 1;
     if (rows.length > selectedRows.length || matrixWidth > width) return makeCellCommand("Paste Range", doc, []);
-    const edits = rows.flatMap((values, i) => values.map((value, column) => ({ row: selectedRows[i], column: left + column, value })));
+    // Only write cells that are actually selected (ctrl-selected cells can sit in different columns).
+    const picked = new Set(rangeCells(ranges).map(({ row, column }) => `${row}:${column}`));
+    const edits = rows.flatMap((values, i) => values.map((value, column) => ({ row: selectedRows[i], column: left + column, value })))
+      .filter(({ row, column }) => picked.has(`${row}:${column}`));
     return makeCellCommand("Paste Range", doc, edits);
+  }
+  if (sorted && rows.length === 1 && matrixWidth > 1 && ranges.every((r) => r.left === r.right && r.left === ranges[0].left)) {
+    const edits = rangeCells(ranges).flatMap(({ row, column }) => rows[0].map((value, i) => ({ row, column: column + i, value })));
+    return makeCellCommand("Paste Selection", doc, edits);
   }
   if (rows.length > 1 || matrixWidth > 1) {
     const [range] = ranges;
