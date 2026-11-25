@@ -849,6 +849,9 @@ export function createSettingsController({
         : vectorGameVersion(state.config),
       rulesOpen: state.lint.legacy.rulesOpen
     });
+    const menuDocument = els.lintControls.ownerDocument;
+    for (const item of menuDocument?.querySelectorAll?.(".menu-panel [data-command='toggle-lint-rules']") ?? []) item.disabled = !controls.rulesButton;
+    for (const item of menuDocument?.querySelectorAll?.(".menu-panel [data-command='toggle-vector-lsp-hover']") ?? []) item.disabled = !controls.hoverButton;
     const lintButton = `<button class="toggle-button${controls.lintButton.active ? " active" : ""}" data-command="${controls.lintButton.id}">${controls.lintButton.label}</button>`;
     const engineOptions = controls.engineSelect.options.map((option) =>
       `<option value="${escapeHtml(option.value)}"${option.selected ? " selected" : ""}>${escapeHtml(option.label)}</option>`

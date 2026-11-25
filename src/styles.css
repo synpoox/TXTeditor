@@ -416,18 +416,6 @@ button.button-click-feedback {
   height: 100vh;
 }
 
-.activity {
-  grid-column: 1;
-  grid-row: 1;
-  background: var(--surface-1);
-  border-right: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 8px;
-  gap: 6px;
-}
-
 .layout-root {
   grid-column: 1;
   grid-row: 2;
@@ -512,25 +500,11 @@ button.button-click-feedback {
   cursor: ew-resize;
 }
 
-.activity-button {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  color: var(--muted);
-  font-weight: 700;
-}
-
-.activity-button.active {
-  color: var(--text-strong);
-  border-left: 2px solid var(--accent);
-}
-
-.activity-button[data-badge]::after {
+.menu-trigger[data-badge]::after,
+.menu-panel button[data-badge]::after {
   content: attr(data-badge);
-  position: absolute;
-  right: 2px;
-  top: 2px;
+  margin-left: 8px;
+  display: inline-block;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
@@ -611,30 +585,6 @@ button.button-click-feedback {
   color: var(--muted);
   font-size: 11px;
   letter-spacing: .08em;
-}
-
-.sidebar-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 8px;
-}
-
-.sidebar-actions button,
-.toolbar button {
-  background: var(--button-bg);
-  border: 1px solid var(--button-border);
-  border-radius: 4px;
-  height: 30px;
-  color: var(--text);
-}
-
-.sidebar-actions button {
-  min-width: 0;
-  padding: 0 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .sidebar-search {
@@ -802,15 +752,6 @@ button.button-click-feedback {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.workspace-menu-trigger {
-  margin-left: auto;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  font-size: 18px;
-  color: var(--muted);
 }
 
 .context-menu [data-diagnostic-copy] > span {
@@ -986,33 +927,6 @@ button.button-click-feedback {
 
 .tabs button:focus-visible {
   outline-offset: -3px;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  min-height: 38px;
-  padding: 4px 8px;
-  background: var(--surface-3);
-  border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-  overflow-y: hidden;
-  flex-wrap: nowrap;
-  scrollbar-width: thin;
-}
-
-.toolbar button {
-  min-width: 72px;
-  height: 28px;
-  padding: 0 10px;
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
-
-.toolbar .toggle-button {
-  min-width: 88px;
 }
 
 .cell-input-bar {
@@ -2328,11 +2242,6 @@ details:not([open]) .problem-file-header::before {
   color: var(--warningText, #d7a56d);
   font-size: 12px;
   line-height: 1.35;
-}
-
-.toolbar button:disabled {
-  cursor: default;
-  opacity: .45;
 }
 
 .shortcut-modal-actions {

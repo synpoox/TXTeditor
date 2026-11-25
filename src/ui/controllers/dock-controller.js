@@ -105,7 +105,7 @@ export function createDockController({
     root.style.setProperty("--sidebar-height", `${state.sidebarHeight}px`);
     root.style.setProperty("--problems-width", `${state.problemsWidth}px`);
     root.style.setProperty("--problems-height", `${state.problemsHeight}px`);
-    const layoutWidth = Math.max(MIN_EDITOR_WIDTH, els.layoutRoot?.clientWidth || window.innerWidth - 48);
+    const layoutWidth = Math.max(MIN_EDITOR_WIDTH, els.layoutRoot?.clientWidth || window.innerWidth);
     const layoutHeight = Math.max(MIN_EDITOR_HEIGHT, els.layoutRoot?.clientHeight || window.innerHeight);
     const [leftWidth, rightWidth] = fitDockPair(
       dockEdgeWidth("left"),

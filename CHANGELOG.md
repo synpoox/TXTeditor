@@ -6,6 +6,12 @@
 - Display-only column sort (ascending / descending) from the context menu. The table is never modified: rows keep their original indexes and the header row stays in place. Numbers sort before text and empty cells always last. A sort indicator shows in the sorted column header, and Clear Sort restores the original view.
 - Selection, keyboard navigation, copy, paste, fill and Delete/Clear Row follow the displayed order while a sort is active.
 
+### Changed
+- The button toolbar, the E/P activity bar and the sidebar ⋯ menu are replaced by a single top menubar with File, Edit, View and Tools menus. The old ⋯ workspace actions (profiles, recent workspaces, hidden files) are under File > Workspace….
+- Menus support keyboard navigation (arrow keys, Escape) and close when you click elsewhere or switch windows.
+- The Explorer problem-count badge now shows on the View menu and its Explorer item.
+- Lint Rules and Vector-LSP Hover are disabled in the Tools menu when the active lint engine doesn't use them.
+
 ### Known limitations
 - Find Next follows source order, not the displayed order.
 - Insert Row and Clone Row place the new blank row last in the sorted view.

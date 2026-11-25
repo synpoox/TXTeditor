@@ -54,11 +54,14 @@ export function createShellController({
     updateGridDiagnostics();
     for (const button of documentRef.querySelectorAll("[data-command='show-explorer']")) {
       const count = lintNotificationCount();
+      const trigger = button.closest(".menu")?.querySelector("[data-menu]");
       if (count) {
         button.dataset.badge = String(count);
+        if (trigger) trigger.dataset.badge = String(count);
         button.title = `${tText("activity.explorer")} (${count} ${tText("activity.problems").toLowerCase()})`;
       } else {
         delete button.dataset.badge;
+        if (trigger) delete trigger.dataset.badge;
         button.title = tText("activity.explorer");
       }
     }
@@ -133,6 +136,9 @@ export function createShellController({
       button.disabled = !tableDocumentOpen;
       button.classList.toggle("active", tableDocumentOpen && state.freezeColumn);
     }
+    for (const button of documentRef.querySelectorAll("[data-command='toggle-vector-lsp-hover']")) {
+      button.classList.toggle("active", Boolean(state.vectorLspHover));
+    }
     for (const button of documentRef.querySelectorAll("[data-command='toggle-colorize']")) {
       button.classList.toggle("active", state.colorizeColumns);
     }
@@ -159,7 +165,7 @@ export function createShellController({
     for (const button of documentRef.querySelectorAll("[data-workspace-menu]")) {
       button.onclick = (event) => {
         event.stopPropagation();
-        documentRef.querySelectorAll?.(".menu.open").forEach(menu => menu.classList.remove("open"));
+        documentRef.querySelectorAll?.(".menu.open").forEach(menu => { menu.classList.remove("open"); menu.querySelector("[data-menu]")?.setAttribute("aria-expanded", "false"); });
         if (state.contextMenuOpen) {
           hideContextMenu();
           return;

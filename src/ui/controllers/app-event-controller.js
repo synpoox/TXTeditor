@@ -39,14 +39,55 @@ export function createAppEventController({
   commitActiveEditor = () => {},
   focusActiveEditor = () => els.host.focus()
 }) {
+  function closeMenus() {
+    for (const open of document.querySelectorAll(".menu.open")) {
+      open.classList.remove("open");
+      open.querySelector("[data-menu]")?.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function openMenu(menu, focusFirst = false) {
+    closeMenus();
+    menu.classList.add("open");
+    menu.querySelector("[data-menu]")?.setAttribute("aria-expanded", "true");
+    if (focusFirst) menu.querySelector(".menu-panel button:not(:disabled)")?.focus();
+  }
+
+  // Arrows move through items and menus; Escape or any other typing closes them.
+  function handleMenuKeydown(event) {
+    const open = document.querySelector?.(".menu.open");
+    const menu = event.target.closest?.(".menu");
+    if (event.key === "Escape") {
+      if (open) { closeMenus(); (menu?.querySelector("[data-menu]") ?? els.host).focus(); }
+      return;
+    }
+    if (!menu) {
+      if (open && !event.ctrlKey && !event.metaKey && !event.altKey) closeMenus();
+      return;
+    }
+    const menus = [...document.querySelectorAll(".menu")];
+    const items = [...menu.querySelectorAll(".menu-panel button:not(:disabled)")];
+    const delta = { ArrowDown: 1, ArrowUp: -1 }[event.key];
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      openMenu(menus[(menus.indexOf(menu) + (event.key === "ArrowRight" ? 1 : menus.length - 1)) % menus.length], true);
+    } else if (delta) {
+      event.preventDefault();
+      if (!menu.classList.contains("open")) return openMenu(menu, true);
+      items[(items.indexOf(event.target) + delta + items.length) % items.length]?.focus();
+    }
+  }
+
   function wireEvents() {
+    document.addEventListener("pointerdown", (event) => { if (!event.target.closest(".menu")) closeMenus(); }, true);
+    window.addEventListener("blur", closeMenus);
     document.addEventListener("click", (event) => {
       showButtonClickFeedback(event.target);
       const trigger = event.target.closest("[data-menu]");
       const menu = trigger?.parentElement;
       const wasOpen = menu?.classList.contains("open");
-      for (const open of document.querySelectorAll(".menu.open")) open.classList.remove("open");
-      if (menu && !wasOpen) menu.classList.add("open");
+      closeMenus();
+      if (menu && !wasOpen) openMenu(menu);
       const command = event.target.closest("[data-command]")?.dataset.command;
       if (command) Promise.resolve(commands[command]?.()).catch(showError);
       const bottomTab = event.target.closest("[data-bottom-tab]")?.dataset.bottomTab;
@@ -96,6 +137,7 @@ export function createAppEventController({
   }
 
   function handleFindKeydown(event) {
+    handleMenuKeydown(event);
     const configuredSearch = globalShortcutAction(event, { shortcuts: state.shortcuts }) === "search";
     if (configuredSearch || isNativeFindShortcut(event)) {
       event.preventDefault();
@@ -106,7 +148,6 @@ export function createAppEventController({
   function handleGlobalKeydown(event) {
     if (event.defaultPrevented) return;
     const editingCell = els.editor.classList.contains("active");
-    if (event.key === "Escape") document.querySelectorAll(".menu.open").forEach(menu => menu.classList.remove("open"));
     if (event.key === "Escape" && !els.contextMenu.classList.contains("hidden")) {
       event.preventDefault();
       hideContextMenu();
