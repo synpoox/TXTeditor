@@ -32,6 +32,7 @@ export function createShellController({
   showActionContextMenu = () => {},
   openWorkspaceProfile = async () => {},
   saveWorkspaceProfile = async () => {},
+  closeFolder = async () => {},
   hideContextMenu = () => {},
   commitActiveEditor = () => {},
   saveSelectionState = () => {},
@@ -254,6 +255,7 @@ export function createShellController({
     const entries = [
       { id: "open-workspace", label: tText("workspace.openProfile"), action: () => openWorkspaceProfile() },
       { id: "save-workspace", label: tText("workspace.saveProfile"), disabled: !state.workspace, action: saveWorkspaceProfile },
+      { id: "close-folder", label: tText("workspace.closeFolder"), disabled: !state.workspace, action: closeFolder },
       hiddenFilesMenuEntry(x, y, true)
     ];
     const recent = state.recentWorkspaceProfiles ?? [];

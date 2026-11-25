@@ -464,6 +464,7 @@ shellController = createShellController({
   showActionContextMenu: (options) => commandSurfaceController.showActionContextMenu(options),
   hideContextMenu: () => commandSurfaceController.hideContextMenu(),
   openWorkspaceProfile: documentController.openWorkspaceProfile,
+  closeFolder: documentController.closeFolder,
   saveWorkspaceProfile: documentController.saveWorkspaceProfile,
   saveSelectionState,
   recordUiPerf,

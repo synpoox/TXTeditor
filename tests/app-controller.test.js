@@ -1218,6 +1218,15 @@ test("Close All removes workspace and standalone tabs but keeps the workspace fo
   assert.deepEqual(events, [["close", "skills.txt"], ["close", "notes.txt"]]);
 });
 
+test("Close Folder closes documents and the workspace", async () => {
+  const doc = TableDocument.fromText("skills.txt", "skill\nx", { path: "E:/Mods/Example/TXT/skills.txt" });
+  const { controller, state } = testDocumentController([], {}, { workspace: { path: "E:/Mods/Example/TXT", files: [] } });
+  await controller.addDocument(doc);
+  assert.equal(await controller.closeFolder(), true);
+  assert.equal(state.workspace, null);
+  assert.deepEqual(state.docs, []);
+});
+
 test("cancelling Close All preserves the workspace and documents without stopping LSP", async () => {
   const workspaceDoc = TableDocument.fromText("skills.txt", "skill\nchanged", {
     path: "E:\\Mods\\Example\\TXT\\skills.txt",

@@ -557,6 +557,17 @@ export function createDocumentController({
     finally { switchingWorkspace = false; }
   }
 
+  async function closeFolder() {
+    if (!state.workspace) return false;
+    if (switchingWorkspace) {
+      showToast(tText("workspace.switchBusy"));
+      return false;
+    }
+    switchingWorkspace = true;
+    try { return await closeAllNow(); }
+    finally { switchingWorkspace = false; }
+  }
+
   async function closeAllNow({ keepWorkspace = false } = {}) {
     if (keepWorkspace ? !state.docs.length : !state.workspace?.path && !state.docs.length) return false;
 
@@ -993,6 +1004,7 @@ export function createDocumentController({
     addDocument,
     askCloseChoice,
     closeAll,
+    closeFolder,
     closeTab,
     handleCloseDialogClick,
     handleExternalChangeDialogClick,
