@@ -54,7 +54,7 @@ export function createCommandController({
   const commands = createCommandRunners(commandLabels(), runCommand);
 
   function runCommand(id) {
-    if (id === "close-all" && !state.docs.length) return;
+    if ((id === "close-all" || id === "close-editor") && !state.docs.length) return;
     if (!hasOpenDocument() && !canRunCommandWithoutDocument(id)) return showError(tText("error.openDocument"));
     if (hasOpenDocument() && !canRunCommandForDocument(id, activeDocumentKind())) {
       return showError(tText("error.tableOnly"));

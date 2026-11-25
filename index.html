@@ -8,10 +8,110 @@
   </head>
   <body>
     <div id="app" class="shell">
-      <aside class="activity" aria-label="Activity" data-i18n-aria-label="aria.activity">
-        <button class="activity-button active" data-command="show-explorer" data-i18n-title="activity.explorer" title="Explorer">E</button>
-        <button class="activity-button" data-command="show-problems" data-i18n-title="activity.problems" title="Problems">P</button>
-      </aside>
+      <div id="explorerReveal" class="explorer-reveal" role="button" tabindex="-1" aria-hidden="true" data-i18n-title="activity.explorer" title="Explorer"></div>
+      <nav class="menubar" aria-label="Menu" data-i18n-aria-label="aria.menu">
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.file">File</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="open-file" data-i18n="toolbar.openFile">Open File</button>
+            <button role="menuitem" data-command="open-folder" data-i18n="toolbar.openFolder">Open Folder</button>
+            <button role="menuitem" data-workspace-menu aria-haspopup="menu" data-i18n="workspace.section">Workspace</button>
+            <hr />
+            <button role="menuitem" data-command="save-file" data-i18n="toolbar.save">Save</button>
+            <button role="menuitem" data-command="save-as" data-i18n="toolbar.saveAs">Save As</button>
+            <hr />
+            <button role="menuitem" data-command="close-editor" data-i18n="menu.closeEditor" disabled>Close Editor</button>
+            <button role="menuitem" data-command="close-folder" data-i18n="workspace.closeFolder" disabled>Close Folder</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.edit">Edit</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="undo" data-i18n="toolbar.undo">Undo</button>
+            <button role="menuitem" data-command="redo" data-i18n="toolbar.redo">Redo</button>
+            <hr />
+            <button role="menuitem" data-command="search" data-i18n="toolbar.find">Find</button>
+            <button role="menuitem" data-command="replace" data-i18n="command.replace">Find and Replace</button>
+            <button role="menuitem" data-command="go-to-row" data-i18n="command.go-to-row">Go to Row</button>
+            <hr />
+            <button role="menuitem" data-command="cut" data-requires-table data-i18n="command.cut">Cut</button>
+            <button role="menuitem" data-command="copy" data-requires-table data-i18n="command.copy">Copy</button>
+            <button role="menuitem" data-command="paste" data-requires-table data-i18n="command.paste">Paste</button>
+            <button role="menuitem" data-command="select-all" data-requires-table data-i18n="command.select-all">Select All</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.rowOperations">Row Operations</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="add-row" data-requires-table data-i18n="command.add-rows">Add Rows...</button>
+            <button role="menuitem" data-command="insert-row" data-requires-table data-i18n="command.insert-row">Insert Rows...</button>
+            <button role="menuitem" data-command="clone-row" data-requires-table data-i18n="command.clone-row">Clone Row</button>
+            <hr />
+            <button role="menuitem" data-command="hide-row" data-requires-table data-i18n="command.hide-rows">Hide Row(s)</button>
+            <button role="menuitem" data-command="delete-row" data-requires-table data-i18n="command.delete-rows">Delete Row(s)</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.columnOperations">Column Operations</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="add-column" data-requires-table data-i18n="command.add-columns">Add Columns...</button>
+            <button role="menuitem" data-command="insert-column" data-requires-table data-i18n="command.insert-column">Insert Columns...</button>
+            <button role="menuitem" data-command="clone-column" data-requires-table data-i18n="command.clone-columns">Clone Column(s)</button>
+            <hr />
+            <button role="menuitem" data-command="hide-column" data-requires-table data-i18n="command.hide-columns">Hide Column(s)</button>
+            <button role="menuitem" data-command="delete-column" data-requires-table data-i18n="command.delete-columns">Delete Column(s)</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.data">Data</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="sort-ascending" data-requires-table data-i18n="command.sort-ascending">Sort Column Ascending</button>
+            <button role="menuitem" data-command="sort-descending" data-requires-table data-i18n="command.sort-descending">Sort Column Descending</button>
+            <button role="menuitem" data-command="clear-sort" data-requires-table data-i18n="command.clear-sort">Clear Sort</button>
+            <hr />
+            <button role="menuitem" data-command="fill" data-requires-table data-i18n="menu.fill">Fill</button>
+            <button role="menuitem" data-command="increment-fill" data-requires-table data-i18n="command.increment-fill">Increment Fill</button>
+            <button role="menuitem" data-command="math-add" data-requires-table data-i18n="command.math-add">Math Add</button>
+            <button role="menuitem" data-command="math-subtract" data-requires-table data-i18n="command.math-subtract">Math Subtract</button>
+            <button role="menuitem" data-command="math-multiply" data-requires-table data-i18n="command.math-multiply">Math Multiply</button>
+            <button role="menuitem" data-command="math-divide" data-requires-table data-i18n="command.math-divide">Math Divide</button>
+            <hr />
+            <button role="menuitem" data-command="resize-fit" data-requires-table data-i18n="menu.resizeToFit">Resize To Fit</button>
+            <button role="menuitem" data-command="resize-selected-fit" data-requires-table data-i18n="menu.resizeSelectedToFit">Resize Selected To Fit</button>
+            <button role="menuitem" data-command="unhide-all" data-requires-table data-i18n="menu.unhideAll">Unhide All</button>
+            <hr />
+            <button role="menuitem" data-command="go-to-definition" data-requires-table data-i18n="menu.goToDefinition">Go To Definition</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.view">View</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" class="toggle-button" data-command="show-explorer" data-i18n="activity.explorer">Explorer</button>
+            <button role="menuitem" class="toggle-button" data-command="show-problems" data-i18n="activity.problems">Problems</button>
+            <hr />
+            <button role="menuitem" class="toggle-button" data-command="toggle-freeze-row" data-i18n="toolbar.freezeRow">Freeze Row</button>
+            <button role="menuitem" class="toggle-button" data-command="toggle-freeze-column" data-i18n="toolbar.freezeColumn">Freeze Column</button>
+            <button role="menuitem" class="toggle-button" data-command="toggle-colorize" data-i18n="command.toggle-colorize">Colorize Columns</button>
+            <hr />
+            <button role="menuitem" data-command="zoom-in" data-i18n="command.zoom-in">Zoom In</button>
+            <button role="menuitem" data-command="zoom-out" data-i18n="command.zoom-out">Zoom Out</button>
+            <button role="menuitem" data-command="zoom-reset" data-i18n="command.zoom-reset">Reset Zoom</button>
+            <hr />
+            <button role="menuitem" data-command="toggle-theme">Theme</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.tools">Tools</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" class="toggle-button" data-command="toggle-lint">Lint</button>
+            <button role="menuitem" data-command="toggle-lint-rules" data-i18n="command.toggle-lint-rules">Lint Rules</button>
+            <button role="menuitem" class="toggle-button" data-command="toggle-vector-lsp-hover" data-i18n="command.toggle-vector-lsp-hover">Vector-LSP Hover</button>
+            <hr />
+            <button role="menuitem" data-command="open-shortcut-settings" data-i18n="toolbar.shortcuts">Shortcuts</button>
+            <button role="menuitem" data-command="open-app-settings" data-i18n="toolbar.settings">Settings</button>
+          </div>
+        </div>
+      </nav>
 
       <div id="layoutRoot" class="layout-root">
         <section id="dockTop" class="dock dock-top" data-dock-edge="top" aria-label="Top dock" data-i18n-aria-label="aria.topDock"></section>
@@ -21,7 +121,6 @@
             <div id="sidebarResizer" class="sidebar-resizer pane-resizer" aria-hidden="true"></div>
             <header class="sidebar-header">
               <span data-i18n="app.title">TXTeditor</span>
-              <button class="workspace-menu-trigger" data-workspace-menu aria-label="Workspace" data-i18n-aria-label="workspace.section" aria-haspopup="menu">⋯</button>
             </header>
             <div class="sidebar-search">
               <span class="sidebar-search-icon" aria-hidden="true"></span>
@@ -34,20 +133,6 @@
 
         <main class="main">
           <div id="tabs" class="tabs"></div>
-          <section class="toolbar">
-            <button data-command="open-file" data-i18n="toolbar.openFile">Open File</button>
-            <button data-command="open-folder" data-i18n="toolbar.openFolder">Open Folder</button>
-            <button data-command="save-file" data-i18n="toolbar.save">Save</button>
-            <button data-command="save-as" data-i18n="toolbar.saveAs">Save As</button>
-            <button data-command="close-all" data-i18n="toolbar.closeAll" disabled>Close All</button>
-            <button data-command="undo" data-i18n="toolbar.undo">Undo</button>
-            <button data-command="redo" data-i18n="toolbar.redo">Redo</button>
-            <button data-command="search" data-i18n="toolbar.find">Find</button>
-            <button class="toggle-button" data-command="toggle-freeze-row" data-i18n="toolbar.freezeRow">Freeze Row</button>
-            <button class="toggle-button" data-command="toggle-freeze-column" data-i18n="toolbar.freezeColumn">Freeze Column</button>
-            <button data-command="open-shortcut-settings" data-i18n="toolbar.shortcuts">Shortcuts</button>
-            <button data-command="open-app-settings" data-i18n="toolbar.settings">Settings</button>
-          </section>
           <section id="cellInputBar" class="cell-input-bar hidden" aria-label="Active cell input" data-i18n-aria-label="cellInput.aria">
             <output id="cellInputAddress" class="cell-input-address" aria-live="polite"></output>
             <div class="cell-input-field">

@@ -54,17 +54,19 @@ export function createShellController({
     updateGridDiagnostics();
     for (const button of documentRef.querySelectorAll("[data-command='show-explorer']")) {
       const count = lintNotificationCount();
+      const trigger = button.closest(".menu")?.querySelector("[data-menu]");
       if (count) {
         button.dataset.badge = String(count);
+        if (trigger) trigger.dataset.badge = String(count);
         button.title = `${tText("activity.explorer")} (${count} ${tText("activity.problems").toLowerCase()})`;
       } else {
         delete button.dataset.badge;
+        if (trigger) delete trigger.dataset.badge;
         button.title = tText("activity.explorer");
       }
     }
     for (const button of documentRef.querySelectorAll("[data-command='show-problems']")) {
       delete button.dataset.badge;
-      button.textContent = "P";
       button.title = state.lint.diagnostics.length ? `${tText("activity.problems")} (${state.lint.diagnostics.length})` : tText("activity.problems");
     }
     if (els.lintSummary) els.lintSummary.textContent = lintSummaryText();
@@ -122,10 +124,16 @@ export function createShellController({
       button.classList.toggle("active", state.problemsVisible);
       button.setAttribute("aria-pressed", String(state.problemsVisible));
     }
-    for (const button of documentRef.querySelectorAll("[data-command='close-all']")) {
+    for (const button of documentRef.querySelectorAll("[data-command='close-editor']")) {
       button.disabled = !state.docs.length;
     }
+    for (const button of documentRef.querySelectorAll("[data-command='close-folder']")) {
+      button.disabled = !state.workspace;
+    }
     const tableDocumentOpen = documentOpen && isTableDocument(activeDoc());
+    for (const button of documentRef.querySelectorAll("[data-requires-table]")) {
+      button.disabled = !tableDocumentOpen;
+    }
     for (const button of documentRef.querySelectorAll("[data-command='toggle-freeze-row']")) {
       button.disabled = !tableDocumentOpen;
       button.classList.toggle("active", tableDocumentOpen && state.freezeRow);
@@ -133,6 +141,9 @@ export function createShellController({
     for (const button of documentRef.querySelectorAll("[data-command='toggle-freeze-column']")) {
       button.disabled = !tableDocumentOpen;
       button.classList.toggle("active", tableDocumentOpen && state.freezeColumn);
+    }
+    for (const button of documentRef.querySelectorAll("[data-command='toggle-vector-lsp-hover']")) {
+      button.classList.toggle("active", Boolean(state.vectorLspHover));
     }
     for (const button of documentRef.querySelectorAll("[data-command='toggle-colorize']")) {
       button.classList.toggle("active", state.colorizeColumns);
@@ -160,12 +171,14 @@ export function createShellController({
     for (const button of documentRef.querySelectorAll("[data-workspace-menu]")) {
       button.onclick = (event) => {
         event.stopPropagation();
+        // Measure before closing: a closed menu panel is display:none and reports a zero rect.
+        const rect = button.getBoundingClientRect();
+        documentRef.querySelectorAll?.(".menu.open").forEach(menu => { menu.classList.remove("open"); menu.querySelector("[data-menu]")?.setAttribute("aria-expanded", "false"); });
         if (state.contextMenuOpen) {
           hideContextMenu();
           return;
         }
-        const rect = button.getBoundingClientRect();
-        showActionContextMenu({ x: rect.right, y: rect.bottom + 4, alignRight: true, entries: workspaceMenuEntries(rect.right, rect.bottom + 4) });
+        showActionContextMenu({ x: rect.right, y: rect.top, entries: workspaceMenuEntries(rect.right, rect.top) });
       };
     }
     const workspaceFiles = renderWorkspaceFileList({

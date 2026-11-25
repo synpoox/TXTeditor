@@ -130,6 +130,13 @@ const CATALOG_ROWS = {
 };
 
 Object.assign(CATALOG_ROWS, {
+  "menu.file": ["File", "檔案", "Datei", "Archivo", "Fichier", "Archivio", "파일", "Plik", "Archivo", "ファイル", "Arquivo", "Файл", "文件"],
+  "menu.edit": ["Edit", "編輯", "Bearbeiten", "Editar", "Édition", "Modifica", "편집", "Edycja", "Editar", "編集", "Editar", "Правка", "编辑"],
+  "menu.view": ["View", "檢視", "Ansicht", "Ver", "Affichage", "Visualizza", "보기", "Widok", "Ver", "表示", "Exibir", "Вид", "视图"],
+  "menu.tools": ["Tools", "工具", "Extras", "Herramientas", "Outils", "Strumenti", "도구", "Narzędzia", "Herramientas", "ツール", "Ferramentas", "Сервис", "工具"],
+  "aria.menu": ["Main menu", "主選單", "Hauptmenü", "Menú principal", "Menu principal", "Menu principale", "기본 메뉴", "Menu główne", "Menú principal", "メインメニュー", "Menu principal", "Главное меню", "主菜单"],
+  "menu.data": ["Data", "資料", "Daten", "Datos", "Données", "Dati", "데이터", "Dane", "Datos", "データ", "Dados", "Данные", "数据"],
+  "menu.closeEditor": ["Close Editor", "關閉編輯器", "Editor schließen", "Cerrar editor", "Fermer l’éditeur", "Chiudi editor", "편집기 닫기", "Zamknij edytor", "Cerrar editor", "エディターを閉じる", "Fechar editor", "Закрыть редактор", "关闭编辑器"],
   "aria.activity": ["Activity", "活動", "Aktivität", "Actividad", "Activité", "Attività", "활동", "Aktywność", "Actividad", "アクティビティ", "Atividade", "Действия", "活动"],
   "aria.topDock": ["Top dock", "上方停駐區", "Obere Andockleiste", "Panel superior", "Volet supérieur", "Pannello superiore", "상단 도킹 영역", "Górny panel", "Panel superior", "上部ドック", "Painel superior", "Верхняя панель", "顶部靠区"],
   "aria.leftDock": ["Left dock", "左側停駐區", "Linke Andockleiste", "Panel izquierdo", "Volet gauche", "Pannello sinistro", "왼쪽 도킹 영역", "Lewy panel", "Panel izquierdo", "左ドック", "Painel esquerdo", "Левая панель", "左侧靠区"],

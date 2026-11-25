@@ -32,3 +32,8 @@ Tauri v2 desktop editor for Diablo II / D2R tab-separated `.txt`, `animdata.d2`,
 - Put decisions in pure `*-policy.js` / `core` modules and test them; controllers stay thin.
 - User-visible strings go through `src/core/i18n.js` (`i18n-source-audit` test enforces it).
 - Add a regression test for each bug fix.
+
+## Changelog
+
+- Every PR with a user-visible change (feature, fix, UI or behavior change) adds an entry under `## Unreleased` in `CHANGELOG.md`, in the same PR. Group under `### Added` / `### Changed` / `### Fixed`; write for users, one line each.
+- Skip it only for changes with no user impact (tests, CI, refactors, docs).
