@@ -8,7 +8,7 @@ export class GridMetrics {
     this.columnKey = "";
   }
 
-  updateRows({ doc, zoom, scrollStartRow }) {
+  updateRows({ doc, zoom, scrollStartRow, sorted = null }) {
     const key = [
       doc.viewRevision ?? 0,
       doc.rowCount,
@@ -16,6 +16,7 @@ export class GridMetrics {
       doc.hasCustomRowHeights,
       doc.hiddenRows?.size ?? 0,
       scrollStartRow,
+      sorted?.id ?? 0,
       zoom
     ].join("|");
     if (doc === this.rowDocument && key === this.rowKey) return this.rows;
@@ -24,8 +25,9 @@ export class GridMetrics {
     this.rows = buildMetrics({
       count: doc.rowCount,
       start: scrollStartRow,
-      hidden: doc.hiddenRows,
-      sizeAt: (row) => Math.round((doc.rowHeights[row] ?? doc.defaultRowHeight) * zoom),
+      // Under a sort, the index is a display position; hidden rows and heights belong to the source row shown there.
+      hidden: sorted ? { has: (pos) => doc.hiddenRows.has(sorted.order[pos] ?? pos) } : doc.hiddenRows,
+      sizeAt: (pos) => Math.round((doc.rowHeights[sorted ? sorted.order[pos] ?? pos : pos] ?? doc.defaultRowHeight) * zoom),
       simpleSize: !doc.hiddenRows?.size && !doc.hasCustomRowHeights ? Math.round((doc.defaultRowHeight ?? 26) * zoom) : null
     });
     return this.rows;
