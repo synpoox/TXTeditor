@@ -16,8 +16,24 @@ import {
   incrementFillSelectedCellsCommand
 } from "../../core/operations.js";
 import { tText } from "../../core/i18n.js";
-import { cachedRowOrder, withSortSuspended } from "../grid-sort-policy.js";
+import { cachedRowOrder } from "../grid-sort-policy.js";
+import { makeCustomCommand } from "../../core/undo.js";
 import { rowRangesFromRanges } from "../row-operation-policy.js";
+
+function deleteRowRunsCommand(doc, runs) {
+  if (runs.length === 1) return deleteRowsCommand(doc, runs[0][0], runs[0][1] - runs[0][0] + 1);
+  const commands = runs.map(([start, end]) => deleteRowsCommand(doc, start, end - start + 1)).reverse();
+  return makeCustomCommand("Delete Row", {
+    redo(target) {
+      for (const item of commands) item.redo(target);
+    },
+    undo(target) {
+      for (let i = commands.length - 1; i >= 0; i--) commands[i].undo(target);
+    },
+    contentChanged: true,
+    lspChange: { kind: "full" }
+  });
+}
 
 export function createCommandController({
   isDevelopmentMode,
@@ -62,8 +78,8 @@ export function createCommandController({
 
   function executeCommandAction(name, doc, rect) {
     if (name === "clearSelection") return execute(clearRangesCommand(doc, state.selection.ranges));
-    // A selection can span several separate row runs (ctrl-click, or a sorted view): delete exactly those, bottom first so indexes stay valid.
-    if (name === "deleteRow") return withSortSuspended(doc, () => rowRangesFromRanges(state.selection.ranges, doc.rowCount).reverse().forEach(([start, end]) => execute(deleteRowsCommand(doc, start, end - start + 1))));
+    // A selection can span several separate row runs (ctrl-click, or a sorted view); one command keeps it one undo step and one layout.
+    if (name === "deleteRow") return execute(deleteRowRunsCommand(doc, rowRangesFromRanges(state.selection.ranges, doc.rowCount)));
     if (name === "clearRow") return execute(clearRangesCommand(doc, rowRangesFromRanges(state.selection.ranges, doc.rowCount).map(([top, bottom]) => ({ top, bottom, left: 0, right: doc.columnCount - 1 })), "Clear Row"));
     if (name === "hideRow") return execute(hiddenRowsCommand(rowsForRowOperation(), true));
     if (name === "unhideRows") return execute(hiddenRowsCommand(doc.hiddenRows, false));

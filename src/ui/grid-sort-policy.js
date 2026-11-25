@@ -1,6 +1,5 @@
 const sorts = new WeakMap();
 const orders = new WeakMap();
-const suspended = new WeakSet();
 let nextOrderId = 1;
 
 // A sort belongs to one column layout: inserting or deleting columns drops it rather than sorting the wrong column.
@@ -40,7 +39,7 @@ export function sortedRowOrder(doc, sort) {
 // Re-sorts only when the row count changes (or the sort is re-applied), so editing a cell never moves rows under the cursor.
 export function cachedRowOrder(doc) {
   const sort = gridSort(doc);
-  if (!sort || suspended.has(doc)) return null;
+  if (!sort) return null;
   const hit = orders.get(doc);
   if (hit?.count === doc.rowCount && hit.rows === doc.rows) return hit;
   const order = sortedRowOrder(doc, sort);
@@ -49,16 +48,6 @@ export function cachedRowOrder(doc) {
   const entry = { id: nextOrderId++, count: doc.rowCount, rows: doc.rows, order, position };
   orders.set(doc, entry);
   return entry;
-}
-
-// Batch edits that change the row count several times re-sort once at the end instead of after every step.
-export function withSortSuspended(doc, fn) {
-  suspended.add(doc);
-  try {
-    return fn();
-  } finally {
-    suspended.delete(doc);
-  }
 }
 
 // Source-row runs [top, bottom] covered by display positions a..b, so a selection can span a scattered set of rows.
