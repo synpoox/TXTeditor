@@ -428,14 +428,6 @@ button.button-click-feedback {
   gap: 6px;
 }
 
-.shell.activity-hidden {
-  grid-template-columns: 0 minmax(0, 1fr);
-}
-
-.shell.activity-hidden .activity {
-  display: none;
-}
-
 .layout-root {
   grid-column: 1;
   grid-row: 2;

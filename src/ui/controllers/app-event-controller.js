@@ -106,6 +106,7 @@ export function createAppEventController({
   function handleGlobalKeydown(event) {
     if (event.defaultPrevented) return;
     const editingCell = els.editor.classList.contains("active");
+    if (event.key === "Escape") document.querySelectorAll(".menu.open").forEach(menu => menu.classList.remove("open"));
     if (event.key === "Escape" && !els.contextMenu.classList.contains("hidden")) {
       event.preventDefault();
       hideContextMenu();
