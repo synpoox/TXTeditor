@@ -122,7 +122,7 @@ export function createShellController({
       button.setAttribute("aria-pressed", String(state.problemsVisible));
     }
     for (const button of documentRef.querySelectorAll("[data-command='close-all']")) {
-      button.disabled = !state.workspace && !state.docs.length;
+      button.disabled = !state.docs.length;
     }
     const tableDocumentOpen = documentOpen && isTableDocument(activeDoc());
     for (const button of documentRef.querySelectorAll("[data-command='toggle-freeze-row']")) {
