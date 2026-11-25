@@ -202,7 +202,7 @@ export function createManualHighlightController({
 
   function beforeCommand(doc, command) {
     const runtime = ensureDocument(doc);
-    if (!runtime || !isStructuralChange(command?.lspChange) || commandSnapshots.has(command)) return;
+    if (!runtime || !(command?.highlightChanges?.length || isStructuralChange(command?.lspChange)) || commandSnapshots.has(command)) return;
     commandSnapshots.set(command, { doc, before: cloneWorkingState(runtime), after: null });
   }
 
@@ -221,7 +221,13 @@ export function createManualHighlightController({
       return;
     }
     if (direction === "execute" && !record.after) {
-      applyStructuralChange(runtime, doc, command.lspChange, nextId);
+      // A batch (multi-run delete) lists its row deletions bottom first; each sees the row count left after it.
+      const batch = command.highlightChanges;
+      let remaining = doc.rowCount + (batch ?? []).reduce((total, change) => total + change.count, 0);
+      for (const change of batch ?? [command.lspChange]) {
+        if (batch) remaining -= change.count;
+        applyStructuralChange(runtime, doc, change, nextId, batch ? remaining : doc.rowCount);
+      }
       record.after = cloneWorkingState(runtime);
       grid?.draw?.();
     }
@@ -399,13 +405,13 @@ function isStructuralChange(change) {
   return ["insertRows", "deleteRows", "insertColumns", "deleteColumns"].includes(change?.kind);
 }
 
-function applyStructuralChange(runtime, doc, change, nextId) {
+function applyStructuralChange(runtime, doc, change, nextId, rowCount = doc.rowCount) {
   const index = Math.max(0, Math.floor(Number(change?.index) || 0));
   const count = Math.max(0, Math.floor(Number(change?.count) || 0));
   if (change.kind === "insertRows") {
-    insertRuntimeIds(runtime, "row", index, count, doc.rowCount, doc, nextId);
+    insertRuntimeIds(runtime, "row", index, count, rowCount, doc, nextId);
   } else if (change.kind === "deleteRows") {
-    deleteRuntimeIds(runtime, "row", index, count, doc.rowCount, doc, nextId);
+    deleteRuntimeIds(runtime, "row", index, count, rowCount, doc, nextId);
   } else if (change.kind === "insertColumns") {
     insertRuntimeIds(runtime, "column", index, count, doc.columnCount, doc, nextId);
   } else if (change.kind === "deleteColumns") {

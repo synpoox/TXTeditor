@@ -2,6 +2,7 @@ import { clamp } from "../core/table-model.js";
 import { editorBoxStyle, editorCellState, editorKeyAction, keyboardEditStartAction } from "./edit-policy.js";
 import { boundedTableExtent, classifyGridHit, classifyPanePoint, classifyResizeHandle } from "./grid-geometry.js";
 import { GridMetrics } from "./grid-metrics.js";
+import { cachedRowOrder, gridSort, rowRuns, setGridSort } from "./grid-sort-policy.js";
 import { cellBackground, cellTextColor, createGridRenderStats, initialColumnFitWidth, syncGridThemeFromStyle } from "./grid-render-policy.js";
 import { MANUAL_HIGHLIGHT_IDS } from "./manual-highlight.js";
 import { applyColumnSelection, applyRowSelection, applySelectionForHit, hasFullColumnRange, hasFullRowRange, keyboardSelectionTarget } from "./grid-selection-policy.js";
@@ -324,7 +325,7 @@ export class CanvasGrid {
     const scrollStartRow = typeof this.scrollStartRow === "function" ? this.scrollStartRow() : CanvasGrid.prototype.scrollStartRow.call(this);
     const scrollStartColumn = typeof this.scrollStartColumn === "function" ? this.scrollStartColumn() : CanvasGrid.prototype.scrollStartColumn.call(this);
     const zoom = Number.isFinite(Number(this.zoom)) ? Number(this.zoom) : 1;
-    this.metrics.updateRows({ doc: this.doc, zoom, scrollStartRow });
+    this.metrics.updateRows({ doc: this.doc, zoom, scrollStartRow, sorted: cachedRowOrder(this.doc) });
     this.metrics.updateColumns({ doc: this.doc, zoom, scrollStartColumn });
     return this.metrics;
   }
@@ -359,8 +360,10 @@ export class CanvasGrid {
     return CanvasGrid.prototype.gridMetrics.call(this).columnContentLeft(column);
   }
 
+  // Sorting is display-only: metrics work in display positions, everything else in source rows.
   rowContentTop(row) {
-    return CanvasGrid.prototype.gridMetrics.call(this).rowContentTop(row);
+    const sorted = cachedRowOrder(this.doc);
+    return CanvasGrid.prototype.gridMetrics.call(this).rowContentTop(sorted ? sorted.position[row] ?? row : row);
   }
 
   columnAtContent(x) {
@@ -368,7 +371,39 @@ export class CanvasGrid {
   }
 
   rowAtContent(y) {
-    return CanvasGrid.prototype.gridMetrics.call(this).rowAtContent(y);
+    const pos = CanvasGrid.prototype.gridMetrics.call(this).rowAtContent(y);
+    const sorted = cachedRowOrder(this.doc);
+    return sorted ? sorted.order[pos] ?? pos : pos;
+  }
+
+  // Positions are what the user sees; rows are what the document and selection use.
+  displayPosition(row) {
+    return cachedRowOrder(this.doc)?.position[row] ?? row;
+  }
+
+  sourceRow(position) {
+    return cachedRowOrder(this.doc)?.order[position] ?? position;
+  }
+
+  extendSelectionTo(row, column, { fullRows = false } = {}) {
+    const sorted = cachedRowOrder(this.doc);
+    if (!sorted) return fullRows ? this.selection.extendRows(row, this.doc.columnCount) : this.selection.extend(row, column);
+    const sel = this.selection;
+    const [a, b] = [sorted.position[sel.anchor.row] ?? sel.anchor.row, sorted.position[row] ?? row].sort((x, y) => x - y);
+    const left = fullRows ? 0 : Math.min(sel.anchor.column, column);
+    const right = fullRows ? this.doc.columnCount - 1 : Math.max(sel.anchor.column, column);
+    sel.focus = { row, column: fullRows ? right : column };
+    const runs = rowRuns(sorted.order, a, b, (r) => this.doc.hiddenRows.has(r));
+    sel.ranges = (runs.length ? runs : [[row, row]]).map(([top, bottom]) => ({ top, bottom, left, right }));
+  }
+
+  setSort(column, dir) {
+    setGridSort(this.doc, dir ? { column, dir } : null);
+    this.draw();
+  }
+
+  sortState() {
+    return gridSort(this.doc);
   }
 
   visibleColumns() {
@@ -381,12 +416,14 @@ export class CanvasGrid {
   }
 
   visibleRows() {
-    return CanvasGrid.prototype.gridMetrics.call(this).visibleRows({
+    const rows = CanvasGrid.prototype.gridMetrics.call(this).visibleRows({
       scrollTop: this.scrollTop,
       viewportHeight: this.host.clientHeight,
       fixedTop: this.headerHeight + this.frozenRowHeight(),
       overscanPx: this.rowHeight * OVERSCAN_ROWS
     });
+    const sorted = cachedRowOrder(this.doc);
+    return sorted ? rows.map((item) => ({ ...item, row: sorted.order[item.row] ?? item.row })) : rows;
   }
 
   visibleRowIndexes() {
@@ -547,14 +584,14 @@ export class CanvasGrid {
     }
     if (this.dragging === "cell" && hit.kind === "cell") {
       this.clearHoverState();
-      this.selection.extend(hit.row, hit.column);
+      this.extendSelectionTo(hit.row, hit.column);
       this.draw();
       this.notifySelectionChanged("drag-selection");
       return;
     }
     if (this.dragging === hit.kind && (hit.kind === "row-header" || hit.kind === "column-header")) {
       this.clearHoverState();
-      if (hit.kind === "row-header") this.selection.extendRows(hit.row, this.doc.columnCount);
+      if (hit.kind === "row-header") this.extendSelectionTo(hit.row, 0, { fullRows: true });
       else this.selection.extendColumns(hit.column, this.doc.rowCount);
       this.draw();
       this.notifySelectionChanged("drag-selection");
@@ -622,6 +659,10 @@ export class CanvasGrid {
   hideFirstColumnHoverPreview() { return hideGridFirstColumnHoverPreview(this); }
 
   applyHitSelection(hit, extend, toggle = false) {
+    if (extend && !toggle && (hit.kind === "cell" || hit.kind === "row-header")) {
+      this.extendSelectionTo(hit.row, hit.column, { fullRows: hit.kind === "row-header" });
+      return "extend";
+    }
     return applySelectionForHit(this.selection, hit, {
       rowCount: this.doc.rowCount,
       columnCount: this.doc.columnCount,
@@ -661,14 +702,15 @@ export class CanvasGrid {
       ctrlKey: event.ctrlKey,
       altKey: event.altKey,
       metaKey: event.metaKey,
-      focus: this.selection.focus,
+      focus: { row: this.displayPosition(this.selection.focus.row), column: this.selection.focus.column },
       rowCount: this.doc.rowCount,
       columnCount: this.doc.columnCount,
       jumpRow: (row, direction) => this.jumpRow(row, direction),
       jumpColumn: (column, direction) => this.jumpColumn(column, direction)
     });
     if (!target) return;
-    if (target.extend) this.selection.extend(target.row, target.column);
+    target.row = this.sourceRow(target.row);
+    if (target.extend) this.extendSelectionTo(target.row, target.column);
     else this.selection.set(target.row, target.column);
     this.scrollCellIntoView(target.row, target.column);
     event.preventDefault();
@@ -676,13 +718,14 @@ export class CanvasGrid {
     this.notifySelectionChanged("keyboard-selection");
   }
 
+  // row and the result are display positions.
   jumpRow(row, direction) {
     const column = this.selection.focus.column;
-    const startFilled = this.doc.getCell(row, column) !== "";
+    const startFilled = this.doc.getCell(this.sourceRow(row), column) !== "";
     let next = row;
     while (next + direction >= 0 && next + direction < this.doc.rowCount) {
       next += direction;
-      const filled = this.doc.getCell(next, column) !== "";
+      const filled = this.doc.getCell(this.sourceRow(next), column) !== "";
       if (filled !== startFilled) return next;
     }
     return next;
@@ -769,7 +812,9 @@ export class CanvasGrid {
   }
 
   moveSelectionBy(rowDelta, columnDelta) {
-    const { row, column } = movedCell(this.selection.focus, rowDelta, columnDelta, this.doc.rowCount, this.doc.columnCount);
+    const moved = movedCell({ row: this.displayPosition(this.selection.focus.row), column: this.selection.focus.column }, rowDelta, columnDelta, this.doc.rowCount, this.doc.columnCount);
+    const row = this.sourceRow(moved.row);
+    const column = moved.column;
     this.selection.set(row, column);
     this.scrollCellIntoView(row, column);
     this.draw();
@@ -912,7 +957,9 @@ export class CanvasGrid {
 
   statusText() {
     const r = this.selection.rect;
-    return `${this.doc.name} | ${this.doc.rowCount.toLocaleString()} rows x ${this.doc.columnCount.toLocaleString()} columns | R${this.selection.focus.row + 1}:C${this.selection.focus.column + 1} | Selection ${r.bottom - r.top + 1}x${r.right - r.left + 1} | ${this.doc.dirty ? "Modified" : "Saved"} | ${this.doc.encoding} | ${Math.round(this.doc.zoom * 100)}%`;
+    const rows = this.selection.ranges.reduce((n, x) => n + x.bottom - x.top + 1, 0);
+    const height = gridSort(this.doc) && this.selection.ranges.length > 1 ? rows : r.bottom - r.top + 1;
+    return `${this.doc.name} | ${this.doc.rowCount.toLocaleString()} rows x ${this.doc.columnCount.toLocaleString()} columns | R${this.selection.focus.row + 1}:C${this.selection.focus.column + 1} | Selection ${height}x${r.right - r.left + 1} | ${this.doc.dirty ? "Modified" : "Saved"} | ${this.doc.encoding} | ${Math.round(this.doc.zoom * 100)}%`;
   }
 }
 

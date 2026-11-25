@@ -208,7 +208,7 @@ gridCommandController = createGridCommandController({
   columnsFromSelection,
   onZoomChanged: (zoom) => settingsController.recordZoomLevel(zoom)
 });
-const { toggleFreeze, unhideAll, zoomBy, zoomReset, resetRowHeights, goToRow, resizeFit, cloneRows, cloneColumns } = gridCommandController;
+const { toggleFreeze, unhideAll, sortAscending, sortDescending, clearSort, zoomBy, zoomReset, resetRowHeights, goToRow, resizeFit, cloneRows, cloneColumns } = gridCommandController;
 lspController = createLspController({
   state,
   els,
@@ -400,7 +400,7 @@ const commandController = createCommandController({
     cloneRows, cloneColumns,
     addColumns,
     insertColumns,
-    unhideAll,
+    unhideAll, sortAscending, sortDescending, clearSort,
     toggleColorize: settingsController.toggleColorize,
     toggleVectorLspHover: settingsController.toggleVectorLspHover,
     toggleLint: settingsController.toggleLint,

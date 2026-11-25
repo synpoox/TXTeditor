@@ -1,3 +1,4 @@
+import { cachedRowOrder } from "../grid-sort-policy.js";
 import {
   addColumnsCommand,
   addRowsCommand,
@@ -27,7 +28,7 @@ export function createEditCommandController({
 }) {
   async function copyRangesToClipboard(doc, ranges) {
     try {
-      await writeClipboardText(copyRanges(doc, ranges));
+      await writeClipboardText(copyRanges(doc, ranges, cachedRowOrder(doc)?.position));
       return true;
     } catch (error) {
       showError(tText("error.clipboardCopy", { error: error instanceof Error ? error.message : String(error) }));
@@ -59,7 +60,7 @@ export function createEditCommandController({
     try {
       const text = await readClipboardText();
       if (activeDoc() !== targetDoc) return;
-      execute(pasteTextToRangesCommand(targetDoc, targetRanges, targetFocus, text));
+      execute(pasteTextToRangesCommand(targetDoc, targetRanges, targetFocus, text, cachedRowOrder(targetDoc)));
     } catch (error) {
       showError(tText("error.clipboardPaste", { error: error instanceof Error ? error.message : String(error) }));
     }

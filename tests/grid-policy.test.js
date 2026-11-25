@@ -235,6 +235,7 @@ test("#83 row index dragging extends whole-row selection in both directions", ()
       hideFirstColumnHoverPreview() {},
       isScrollbarEvent: () => false,
       hitTest: () => hits.shift(),
+      extendSelectionTo: CanvasGrid.prototype.extendSelectionTo,
       resizeHit: () => null,
       applyHitSelection(hit, extend, toggle) {
         return applySelectionForHit(selection, hit, {
