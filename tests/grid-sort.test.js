@@ -34,3 +34,13 @@ test("rowRuns merges display positions into source-row ranges", () => {
   assert.deepEqual(rowRuns([0, 4, 2, 3, 1], 1, 3), [[2, 4]]);
   assert.deepEqual(rowRuns([0, 4, 1, 3, 2], 1, 2), [[1, 1], [4, 4]]);
 });
+
+test("selection with many scattered ranges answers contains/hasFullRow like a plain scan", async () => {
+  const { SelectionModel } = await import("../src/core/selection.js");
+  const sel = new SelectionModel();
+  sel.ranges = Array.from({ length: 100 }, (_, i) => ({ top: i * 3, bottom: i * 3, left: 0, right: 2 }));
+  assert.equal(sel.contains(30, 1), true);
+  assert.equal(sel.contains(31, 1), false);
+  assert.equal(sel.hasFullRow(33, 3), true);
+  assert.equal(sel.hasFullRow(34, 3), false);
+});

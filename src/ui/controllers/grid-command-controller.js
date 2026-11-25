@@ -41,7 +41,9 @@ export function createGridCommandController({
 
   function sortColumn(dir) {
     if (!hasOpenDocument()) return;
-    grid.setSort(state.contextHit?.column ?? state.selection.focus.column, dir);
+    // contextHit is only meaningful while the context menu is open, and only for cell/column-header hits.
+    const hit = state.contextMenuOpen && (state.contextHit?.kind === "cell" || state.contextHit?.kind === "column-header") ? state.contextHit : null;
+    grid.setSort(hit?.column ?? state.selection.focus.column, dir);
   }
 
   function unhideAll() {

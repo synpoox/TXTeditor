@@ -41,11 +41,11 @@ export function cachedRowOrder(doc) {
   const sort = gridSort(doc);
   if (!sort) return null;
   const hit = orders.get(doc);
-  if (hit?.count === doc.rowCount) return hit;
+  if (hit?.count === doc.rowCount && hit.rows === doc.rows) return hit;
   const order = sortedRowOrder(doc, sort);
   const position = new Array(order.length);
   order.forEach((row, pos) => { position[row] = pos; });
-  const entry = { id: nextOrderId++, count: doc.rowCount, order, position };
+  const entry = { id: nextOrderId++, count: doc.rowCount, rows: doc.rows, order, position };
   orders.set(doc, entry);
   return entry;
 }

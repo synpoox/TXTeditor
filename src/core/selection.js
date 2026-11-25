@@ -97,12 +97,36 @@ export class SelectionModel {
     return this.ranges.length > 1;
   }
 
+  // Many scattered ranges (a drag over a sorted view) make per-cell scans slow; index them by row.
+  rangesForRow(row) {
+    const ranges = this.ranges;
+    if (ranges.length <= 32) return ranges.filter((r) => row >= r.top && row <= r.bottom);
+    if (this._rowIndexFor !== ranges) {
+      this._rowIndexFor = ranges;
+      this._rowIndex = null;
+      // Skip the index when the ranges cover so many rows that building it would cost more than scanning.
+      if (ranges.reduce((total, r) => total + r.bottom - r.top + 1, 0) <= 1000000) {
+        const index = new Map();
+        for (const r of ranges) {
+          for (let y = r.top; y <= r.bottom; y++) {
+            const list = index.get(y);
+            if (list) list.push(r);
+            else index.set(y, [r]);
+          }
+        }
+        this._rowIndex = index;
+      }
+    }
+    if (!this._rowIndex) return ranges.filter((r) => row >= r.top && row <= r.bottom);
+    return this._rowIndex.get(row) ?? [];
+  }
+
   contains(row, column) {
-    return this.ranges.some((r) => row >= r.top && row <= r.bottom && column >= r.left && column <= r.right);
+    return this.rangesForRow(row).some((r) => column >= r.left && column <= r.right);
   }
 
   hasFullRow(row, columnCount) {
-    return this.ranges.some((r) => r.left === 0 && r.right >= columnCount - 1 && row >= r.top && row <= r.bottom);
+    return this.rangesForRow(row).some((r) => r.left === 0 && r.right >= columnCount - 1);
   }
 
   hasFullColumn(column, rowCount) {
