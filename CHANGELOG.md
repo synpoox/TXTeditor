@@ -11,6 +11,9 @@
 - Menus support keyboard navigation (arrow keys, Escape) and close when you click elsewhere or switch windows.
 - The Explorer problem-count badge now shows on the View menu and its Explorer item.
 - Lint Rules and Vector-LSP Hover are disabled in the Tools menu when the active lint engine doesn't use them.
+- The grid context-menu actions are also in the menubar: Cut/Copy/Paste/Select All under Edit, and new Row Operations, Column Operations and Data (sort, fill, math, resize, unhide, go to definition) menus. Table items are disabled when no table is open.
+- Hovering a menu while another is open switches to it.
+- The Explorer behaves like VS Code: dragging it narrower than a snap point closes it, a window narrower than about 720px auto-closes it (and restores it when widened again), and a thin strip on the left edge reopens it.
 
 ### Known limitations
 - Find Next follows source order, not the displayed order.

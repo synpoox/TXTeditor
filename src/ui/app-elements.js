@@ -7,6 +7,7 @@ export const APP_ELEMENT_IDS = Object.freeze({
   dockBottom: "dockBottom",
   sidebar: "sidebar",
   sidebarResizer: "sidebarResizer",
+  explorerReveal: "explorerReveal",
   problemsPanel: "problemsPanel",
   problemsResizer: "problemsResizer",
   problemsList: "problemsList",

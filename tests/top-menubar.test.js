@@ -8,7 +8,7 @@ test("top menubar replaces the toolbar and activity bar and is accessible", () =
   assert.doesNotMatch(html, /class="(toolbar|activity)"/);
   assert.doesNotMatch(html, /workspace-menu-trigger/);
   const triggers = html.match(/<button class="menu-trigger"[^>]*>/g) ?? [];
-  assert.equal(triggers.length, 4);
+  assert.equal(triggers.length, 7);
   for (const trigger of triggers) assert.match(trigger, /aria-expanded="false"/);
   const panels = html.match(/<div class="menu-panel"[\s\S]*?<\/div>/g) ?? [];
   for (const panel of panels) {

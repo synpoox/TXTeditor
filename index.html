@@ -8,6 +8,7 @@
   </head>
   <body>
     <div id="app" class="shell">
+      <div id="explorerReveal" class="explorer-reveal" role="button" tabindex="-1" aria-hidden="true" data-i18n-title="activity.explorer" title="Explorer"></div>
       <nav class="menubar" aria-label="Menu" data-i18n-aria-label="aria.menu">
         <div class="menu">
           <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.file">File</button>
@@ -31,6 +32,54 @@
             <button role="menuitem" data-command="search" data-i18n="toolbar.find">Find</button>
             <button role="menuitem" data-command="replace" data-i18n="command.replace">Find and Replace</button>
             <button role="menuitem" data-command="go-to-row" data-i18n="command.go-to-row">Go to Row</button>
+            <hr />
+            <button role="menuitem" data-command="cut" data-requires-table data-i18n="command.cut">Cut</button>
+            <button role="menuitem" data-command="copy" data-requires-table data-i18n="command.copy">Copy</button>
+            <button role="menuitem" data-command="paste" data-requires-table data-i18n="command.paste">Paste</button>
+            <button role="menuitem" data-command="select-all" data-requires-table data-i18n="command.select-all">Select All</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.rowOperations">Row Operations</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="add-row" data-requires-table data-i18n="command.add-rows">Add Rows...</button>
+            <button role="menuitem" data-command="insert-row" data-requires-table data-i18n="command.insert-row">Insert Rows...</button>
+            <button role="menuitem" data-command="clone-row" data-requires-table data-i18n="command.clone-row">Clone Row</button>
+            <hr />
+            <button role="menuitem" data-command="hide-row" data-requires-table data-i18n="command.hide-rows">Hide Row(s)</button>
+            <button role="menuitem" data-command="delete-row" data-requires-table data-i18n="command.delete-rows">Delete Row(s)</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.columnOperations">Column Operations</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="add-column" data-requires-table data-i18n="command.add-columns">Add Columns...</button>
+            <button role="menuitem" data-command="insert-column" data-requires-table data-i18n="command.insert-column">Insert Columns...</button>
+            <button role="menuitem" data-command="clone-column" data-requires-table data-i18n="command.clone-columns">Clone Column(s)</button>
+            <hr />
+            <button role="menuitem" data-command="hide-column" data-requires-table data-i18n="command.hide-columns">Hide Column(s)</button>
+            <button role="menuitem" data-command="delete-column" data-requires-table data-i18n="command.delete-columns">Delete Column(s)</button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="menu-trigger" data-menu aria-haspopup="menu" aria-expanded="false" data-i18n="menu.data">Data</button>
+          <div class="menu-panel" role="menu">
+            <button role="menuitem" data-command="sort-ascending" data-requires-table data-i18n="command.sort-ascending">Sort Column Ascending</button>
+            <button role="menuitem" data-command="sort-descending" data-requires-table data-i18n="command.sort-descending">Sort Column Descending</button>
+            <button role="menuitem" data-command="clear-sort" data-requires-table data-i18n="command.clear-sort">Clear Sort</button>
+            <hr />
+            <button role="menuitem" data-command="fill" data-requires-table data-i18n="menu.fill">Fill</button>
+            <button role="menuitem" data-command="increment-fill" data-requires-table data-i18n="command.increment-fill">Increment Fill</button>
+            <button role="menuitem" data-command="math-add" data-requires-table data-i18n="command.math-add">Math Add</button>
+            <button role="menuitem" data-command="math-subtract" data-requires-table data-i18n="command.math-subtract">Math Subtract</button>
+            <button role="menuitem" data-command="math-multiply" data-requires-table data-i18n="command.math-multiply">Math Multiply</button>
+            <button role="menuitem" data-command="math-divide" data-requires-table data-i18n="command.math-divide">Math Divide</button>
+            <hr />
+            <button role="menuitem" data-command="resize-fit" data-requires-table data-i18n="menu.resizeToFit">Resize To Fit</button>
+            <button role="menuitem" data-command="resize-selected-fit" data-requires-table data-i18n="menu.resizeSelectedToFit">Resize Selected To Fit</button>
+            <button role="menuitem" data-command="unhide-all" data-requires-table data-i18n="menu.unhideAll">Unhide All</button>
+            <hr />
+            <button role="menuitem" data-command="go-to-definition" data-requires-table data-i18n="menu.goToDefinition">Go To Definition</button>
           </div>
         </div>
         <div class="menu">

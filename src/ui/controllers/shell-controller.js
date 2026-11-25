@@ -128,6 +128,9 @@ export function createShellController({
       button.disabled = !state.docs.length;
     }
     const tableDocumentOpen = documentOpen && isTableDocument(activeDoc());
+    for (const button of documentRef.querySelectorAll("[data-requires-table]")) {
+      button.disabled = !tableDocumentOpen;
+    }
     for (const button of documentRef.querySelectorAll("[data-command='toggle-freeze-row']")) {
       button.disabled = !tableDocumentOpen;
       button.classList.toggle("active", tableDocumentOpen && state.freezeRow);

@@ -15,11 +15,11 @@ import {
   resetDockLayoutState
 } from "../dock-layout-policy.js";
 import { syncDockChildren } from "../dock-sync.js";
+import { EXPLORER_MAX_WIDTH, EXPLORER_MIN_WIDTH, explorerAutoVisibility, explorerDragResult } from "../explorer-resize-policy.js";
 import {
   DOCK_LAYOUT_KEY,
   ACTIVITY_BAR_VISIBILITY_KEY,
   MIN_PROBLEMS_HEIGHT,
-  MIN_SIDEBAR_WIDTH,
   PROBLEMS_HEIGHT_KEY,
   PROBLEMS_VISIBILITY_KEY,
   SIDEBAR_VISIBILITY_KEY,
@@ -264,7 +264,7 @@ export function createDockController({
   }
 
   function setSidebarWidth(width) {
-    state.sidebarWidth = clamp(Math.round(width), MIN_SIDEBAR_WIDTH, 520);
+    state.sidebarWidth = clamp(Math.round(width), EXPLORER_MIN_WIDTH, EXPLORER_MAX_WIDTH);
     document.documentElement.style.setProperty("--sidebar-width", `${state.sidebarWidth}px`);
     localStorage.setItem(SIDEBAR_WIDTH_KEY, String(state.sidebarWidth));
     syncDockLayout();
@@ -300,6 +300,24 @@ export function createDockController({
   function wirePaneResizers() {
     wirePanelResizer("explorer", els.sidebarResizer);
     wirePanelResizer("problems", els.problemsResizer);
+    els.explorerReveal?.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      if (!state.sidebarVisible) toggleExplorerPane();
+    });
+    if (typeof window !== "undefined" && window.addEventListener) {
+      window.addEventListener("resize", autoCollapseExplorer);
+      autoCollapseExplorer();
+    }
+  }
+
+  // Narrow window: hide the Explorer without persisting; widening restores only what this hid.
+  function autoCollapseExplorer() {
+    const next = explorerAutoVisibility({ windowWidth: window.innerWidth, visible: state.sidebarVisible, autoCollapsed: state.explorerAutoCollapsed });
+    if (!next) return;
+    state.sidebarVisible = next === "show";
+    state.explorerAutoCollapsed = next === "hide";
+    renderChrome();
+    layoutGrid();
   }
 
   function wirePanelResizer(panel, handle) {
@@ -316,7 +334,13 @@ export function createDockController({
           : edge === "right" ? startX - moveEvent.clientX
             : edge === "top" ? moveEvent.clientY - startY
               : startY - moveEvent.clientY;
-        setDockEdgeSize(edge, startSize + delta);
+        const size = startSize + delta;
+        if (panel === "explorer" && (edge === "left" || edge === "right") && explorerDragResult(size).collapse) {
+          onUp();
+          if (state.sidebarVisible) toggleExplorerPane();
+          return;
+        }
+        setDockEdgeSize(edge, size);
       };
       const onUp = () => {
         window.removeEventListener("pointermove", onMove);
@@ -329,6 +353,7 @@ export function createDockController({
 
   async function toggleExplorerPane() {
     const gridHadFocus = document.activeElement === els.host;
+    state.explorerAutoCollapsed = false;
     state.sidebarVisible = nextPanelVisibility(state.sidebarVisible);
     localStorage.setItem(SIDEBAR_VISIBILITY_KEY, panelVisibilityStorageValue(state.sidebarVisible));
     renderChrome();
