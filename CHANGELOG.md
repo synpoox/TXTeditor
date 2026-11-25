@@ -13,6 +13,7 @@
 - Lint Rules and Vector-LSP Hover are disabled in the Tools menu when the active lint engine doesn't use them.
 - The grid context-menu actions are also in the menubar: Cut/Copy/Paste/Select All under Edit, and new Row Operations, Column Operations and Data (sort, fill, math, resize, unhide, go to definition) menus. Table items are disabled when no table is open.
 - Hovering a menu while another is open switches to it.
+- File > Close All is split into Close Editor (closes the active tab) and Close Folder (closes the workspace). Close All remains in the command palette.
 - The Explorer behaves like VS Code: dragging it narrower than a snap point closes it, a window narrower than about 720px auto-closes it (and restores it when widened again), and a thin strip on the left edge reopens it.
 
 ### Known limitations

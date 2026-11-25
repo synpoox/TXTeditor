@@ -124,8 +124,11 @@ export function createShellController({
       button.classList.toggle("active", state.problemsVisible);
       button.setAttribute("aria-pressed", String(state.problemsVisible));
     }
-    for (const button of documentRef.querySelectorAll("[data-command='close-all']")) {
+    for (const button of documentRef.querySelectorAll("[data-command='close-editor']")) {
       button.disabled = !state.docs.length;
+    }
+    for (const button of documentRef.querySelectorAll("[data-command='close-folder']")) {
+      button.disabled = !state.workspace;
     }
     const tableDocumentOpen = documentOpen && isTableDocument(activeDoc());
     for (const button of documentRef.querySelectorAll("[data-requires-table]")) {
