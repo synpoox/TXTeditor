@@ -1201,6 +1201,7 @@ test("Close All removes workspace and standalone tabs but keeps the workspace fo
     isVectorLintEngine: () => true,
     isLegacyLintEngine: () => false,
     lspOpenDoc: async () => {},
+    lspCloseDoc: async (doc) => events.push(["close", doc.name]),
     lspStopSession: async (reason) => events.push(["stop", reason]),
     resetWorkspaceView: () => events.push(["reset-view"])
   });
@@ -1214,8 +1215,7 @@ test("Close All removes workspace and standalone tabs but keeps the workspace fo
   assert.equal(state.workspace.path, "E:\\Mods\\Example\\TXT");
   assert.deepEqual(state.docs, []);
   assert.equal(state.active, -1);
-  assert.deepEqual(state.lint.diagnostics, []);
-  assert.deepEqual(events, []);
+  assert.deepEqual(events, [["close", "skills.txt"], ["close", "notes.txt"]]);
 });
 
 test("cancelling Close All preserves the workspace and documents without stopping LSP", async () => {

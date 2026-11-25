@@ -588,7 +588,7 @@ export function createDocumentController({
     if (keepWorkspace) {
       // The workspace LSP session stays alive; only release the documents.
       stopPromise = isVectorLintEngine()
-        ? Promise.all(state.docs.filter(isTableDocument).map((doc) => Promise.resolve(lspCloseDoc(doc)).catch((error) => reportLspCloseFailure(doc, error, "close-all"))))
+        ? Promise.all(state.docs.map((doc) => Promise.resolve(lspCloseDoc(doc)).catch((error) => reportLspCloseFailure(doc, error, "close-all"))))
         : Promise.resolve();
     } else {
       resetLegacyWorkspaceIndex();
@@ -599,7 +599,8 @@ export function createDocumentController({
       }
     }
 
-    setLintDiagnostics([]);
+    // Vector-LSP keeps workspace diagnostics; closeDoc removes each closed file's entries.
+    if (!keepWorkspace || !isVectorLintEngine()) setLintDiagnostics([]);
     state.lint.status = "";
     if (!keepWorkspace) {
       state.workspace = null;
