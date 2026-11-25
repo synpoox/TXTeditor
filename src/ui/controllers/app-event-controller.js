@@ -80,6 +80,10 @@ export function createAppEventController({
 
   function wireEvents() {
     document.addEventListener("pointerdown", (event) => { if (!event.target.closest(".menu")) closeMenus(); }, true);
+    document.addEventListener("mouseover", (event) => {
+      const menu = event.target.closest?.(".menu");
+      if (menu && !menu.classList.contains("open") && document.querySelector(".menu.open")) openMenu(menu);
+    });
     window.addEventListener("blur", closeMenus);
     document.addEventListener("click", (event) => {
       showButtonClickFeedback(event.target);

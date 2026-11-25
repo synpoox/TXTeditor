@@ -841,8 +841,12 @@ button.button-click-feedback {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: 44px auto auto minmax(0, 1fr);
+  grid-template-rows: 44px auto minmax(0, 1fr);
 }
+
+.main > .cell-input-bar { grid-row: 2; }
+.main > .grid-host,
+.main > .json-editor-host { grid-row: 3; }
 
 .tabs {
   display: flex;
