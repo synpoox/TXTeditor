@@ -2,10 +2,9 @@
 
 Tauri v2 desktop editor for Diablo II / D2R tab-separated `.txt`, `animdata.d2`, and D2R JSON string files. Canvas-rendered virtual grid. Plain ES modules, no framework. See `README.md` for features.
 
-## Git: fork only
+## Git
 
-- `origin` = `synpoox/TXTeditor` (our fork). Default branch: `next`. Commit and push here only.
-- Upstream is `yinyin333333/TXTeditor`. **Never push, open PRs, or add a remote to it.** PRs target `synpoox/TXTeditor` `next` (`gh pr create --repo synpoox/TXTeditor --base next`).
+- `origin` = `synpoox/TXTeditor`. Default branch: `next`. Commit and push there; PRs target `next`.
 - Work on a branch, never directly on `next`.
 
 ## Commands
