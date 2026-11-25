@@ -59,3 +59,18 @@ test("paste, copy and increment fill follow the displayed order", async () => {
   fill.redo(d);
   assert.deepEqual(sorted.order.slice(1).map((row) => d.rows[row][1]), ["1", "2", "3", "4"]);
 });
+
+test("sorted multi-line paste fills only the selected rows, in displayed order", async () => {
+  const { pasteTextToRangesCommand } = await import("../src/core/operations.js");
+  const d = new TableDocument("t.txt", [["h", "n"], ["a", "10"], ["b", "2"], ["c", "7"], ["d", "1"]]);
+  setGridSort(d, { column: 1, dir: "asc" }); // display: d(1) b(2) c(7) a(10)
+  const sorted = cachedRowOrder(d);
+  // rows 1 and 4 selected (a, d): d is shown first, so "x" -> d, "y" -> a; b and c untouched
+  const ranges = [{ top: 1, bottom: 1, left: 0, right: 0 }, { top: 4, bottom: 4, left: 0, right: 0 }];
+  pasteTextToRangesCommand(d, ranges, { row: 1, column: 0 }, "x\ny", sorted).redo(d);
+  assert.deepEqual([1, 2, 3, 4].map((r) => d.getCell(r, 0)), ["y", "b", "c", "x"]);
+  // a single selected cell pastes down from the focus without overrunning columns
+  const one = [{ top: 2, bottom: 2, left: 1, right: 1 }];
+  pasteTextToRangesCommand(d, one, { row: 2, column: 1 }, "p\nq", sorted).redo(d);
+  assert.equal(d.getCell(3, 1), "q");
+});

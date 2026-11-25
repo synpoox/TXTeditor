@@ -76,13 +76,16 @@ export function pasteTextToRangesCommand(doc, ranges, focus, text, sorted = null
 
   const matrixWidth = rows.reduce((width, row) => Math.max(width, row.length), 0);
   if (sorted && rows.length > 1) {
+    const single = ranges.length === 1 && ranges[0].top === ranges[0].bottom && ranges[0].left === ranges[0].right;
+    if (single) return pasteTextCommand(doc, focus, text, sorted);
+    // Clipboard row i goes to the i-th selected row as displayed; anything that does not fit is refused, as in the unsorted path.
     const selectedRows = [...new Set(ranges.flatMap((r) => Array.from({ length: r.bottom - r.top + 1 }, (_, i) => r.top + i)))]
-      .sort((a, b) => sorted.position[a] - sorted.position[b]);
+      .sort((x, y) => sorted.position[x] - sorted.position[y]);
     const left = Math.min(...ranges.map((r) => r.left));
     const width = Math.max(...ranges.map((r) => r.right)) - left + 1;
-    if (selectedRows.length === 1) return pasteTextCommand(doc, focus, text, sorted);
     if (rows.length > selectedRows.length || matrixWidth > width) return makeCellCommand("Paste Range", doc, []);
-    return pasteTextCommand(doc, { row: selectedRows[0], column: left }, text, sorted);
+    const edits = rows.flatMap((values, i) => values.map((value, column) => ({ row: selectedRows[i], column: left + column, value })));
+    return makeCellCommand("Paste Range", doc, edits);
   }
   if (rows.length > 1 || matrixWidth > 1) {
     const [range] = ranges;

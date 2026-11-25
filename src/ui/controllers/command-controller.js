@@ -16,7 +16,7 @@ import {
   incrementFillSelectedCellsCommand
 } from "../../core/operations.js";
 import { tText } from "../../core/i18n.js";
-import { cachedRowOrder } from "../grid-sort-policy.js";
+import { cachedRowOrder, withSortSuspended } from "../grid-sort-policy.js";
 import { rowRangesFromRanges } from "../row-operation-policy.js";
 
 export function createCommandController({
@@ -63,7 +63,7 @@ export function createCommandController({
   function executeCommandAction(name, doc, rect) {
     if (name === "clearSelection") return execute(clearRangesCommand(doc, state.selection.ranges));
     // A selection can span several separate row runs (ctrl-click, or a sorted view): delete exactly those, bottom first so indexes stay valid.
-    if (name === "deleteRow") return rowRangesFromRanges(state.selection.ranges, doc.rowCount).reverse().forEach(([start, end]) => execute(deleteRowsCommand(doc, start, end - start + 1)));
+    if (name === "deleteRow") return withSortSuspended(doc, () => rowRangesFromRanges(state.selection.ranges, doc.rowCount).reverse().forEach(([start, end]) => execute(deleteRowsCommand(doc, start, end - start + 1))));
     if (name === "clearRow") return execute(clearRangesCommand(doc, rowRangesFromRanges(state.selection.ranges, doc.rowCount).map(([top, bottom]) => ({ top, bottom, left: 0, right: doc.columnCount - 1 })), "Clear Row"));
     if (name === "hideRow") return execute(hiddenRowsCommand(rowsForRowOperation(), true));
     if (name === "unhideRows") return execute(hiddenRowsCommand(doc.hiddenRows, false));
